@@ -21,7 +21,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Hodus 2026 — Ireland',
   description: 'Golf trip to Northern Ireland & Donegal, Sept 13–20, 2026',
-  metadataBase: new URL('https://hodus-ireland-2026.vercel.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ? 'https://hodus-ireland-2026.vercel.app' : 'http://localhost:3000'),
   openGraph: {
     images: ['/og/share-1200x630.png'],
   },
