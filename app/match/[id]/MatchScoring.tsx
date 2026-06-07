@@ -101,7 +101,7 @@ function MatchCard({ match, pairings, holeResults, isAdmin }: {
 
   function pairingNames(p: any): string {
     if (!p) return '—';
-    return `${p.player_a_data?.first_name ?? '?'} & ${p.player_b_data?.first_name ?? '?'}`;
+    return `${p.player_a_data?.name?.split(' ').pop() ?? '?'} & ${p.player_b_data?.name?.split(' ').pop() ?? '?'}`;
   }
 
   async function setHoleResult(hole: number, result: HoleResult | null) {

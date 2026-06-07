@@ -277,7 +277,7 @@ function TeamLegend({ players }: { players: PlayerData[] }) {
             </span>
           </div>
           <div style={{ fontSize: 11, color: 'var(--mute)', fontFamily: 'var(--font-sans)' }}>
-            {players.filter(p => p.team === team).map(p => p.firstName).join(' · ')}
+            {players.filter(p => p.team === team).map(p => p.name.split(' ').pop()).join(' · ')}
           </div>
         </div>
       ))}
@@ -391,7 +391,7 @@ export default function TrendsClient({ players }: { players: PlayerData[] }) {
                         background: active && hasData ? color : 'var(--border)',
                         flexShrink: 0, display: 'inline-block',
                       }} />
-                      {p.firstName}
+                      {p.name.split(' ').pop()}
                       {p.currentIndex != null && (
                         <span style={{ fontSize: 10, opacity: 0.7, fontVariantNumeric: 'tabular-nums' }}>
                           {formatIdx(p.currentIndex)}

@@ -37,11 +37,11 @@ function ArrivalSummary({ outFlights }: { outFlights: (Flight & { players: Playe
       <div className="stack-sm">
         <div className="row-between">
           <span className="small muted">First in</span>
-          <span style={{ fontWeight: 500 }}>{first.players?.first_name} — {formatArrival(first.arrive_at)}</span>
+          <span style={{ fontWeight: 500 }}>{first.players?.name?.split(' ').pop()} — {formatArrival(first.arrive_at)}</span>
         </div>
         <div className="row-between">
           <span className="small muted">Driver waits for</span>
-          <span style={{ fontWeight: 600, color: 'var(--green)' }}>{last.players?.first_name} — {formatArrival(last.arrive_at)}</span>
+          <span style={{ fontWeight: 600, color: 'var(--green)' }}>{last.players?.name?.split(' ').pop()} — {formatArrival(last.arrive_at)}</span>
         </div>
         <div className="row-between">
           <span className="small muted">Total spread</span>

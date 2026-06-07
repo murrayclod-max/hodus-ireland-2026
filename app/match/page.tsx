@@ -39,7 +39,7 @@ export default async function MatchPage() {
   }
 
   function pairingNames(p: any) {
-    return `${p.player_a_data?.first_name ?? '?'} & ${p.player_b_data?.first_name ?? '?'}`;
+    return `${p.player_a_data?.name?.split(' ').pop() ?? '?'} & ${p.player_b_data?.name?.split(' ').pop() ?? '?'}`;
   }
 
   const { data: aces } = await supabase
