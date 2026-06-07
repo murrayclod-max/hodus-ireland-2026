@@ -31,7 +31,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
     <div>
       {/* Hero banner */}
       <div style={{ position: 'relative', height: 200, background: course.rail_color, overflow: 'hidden' }}>
-        <Image src={bannerPath} alt={course.name} fill style={{ objectFit: 'cover', opacity: 0.7 }} onError={() => {}} />
+        <Image src={bannerPath} alt={course.name} fill style={{ objectFit: 'cover', opacity: 0.7 }} />
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, ${course.rail_color}88, ${course.rail_color})` }} />
         <div style={{ position: 'absolute', bottom: 'var(--s-4)', left: 'var(--s-4)', right: 'var(--s-4)', color: '#fff' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s-3)' }}>
