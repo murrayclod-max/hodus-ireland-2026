@@ -1,38 +1,48 @@
 -- Add tees JSONB array to courses (replaces scalar tee_name/course_rating/slope_rating)
 ALTER TABLE courses ADD COLUMN IF NOT EXISTS tees jsonb NOT NULL DEFAULT '[]';
 
--- Seed all tee boxes for the 5 trip courses
+-- Par corrections from confirmed GHIN tee data (Sept 2025)
+-- Portstewart Strand: 71 (not 72); Portrush Dunluce: 72 (not 71 — 71 is Open setup only)
+UPDATE courses SET par = 71 WHERE slug = 'portstewart';
+UPDATE courses SET par = 72 WHERE slug = 'portrush';
+
+-- Royal County Down · par 71
+-- Source: visitor_information page. Red (79.4/151) omitted — women's tee.
 UPDATE courses SET tees = '[
-  {"name":"Championship","yards":7186,"rating":74.3,"slope":141},
-  {"name":"Medal",       "yards":6604,"rating":71.7,"slope":133},
-  {"name":"Scratch",     "yards":6152,"rating":69.5,"slope":126},
-  {"name":"Red",         "yards":5579,"rating":72.3,"slope":130}
+  {"name":"Blue",   "rating":75.9, "slope":145, "par":71, "yards":7206},
+  {"name":"White",  "rating":74.8, "slope":136, "par":71, "yards":6925},
+  {"name":"Yellow", "rating":73.5, "slope":134, "par":71, "yards":6651},
+  {"name":"Green",  "rating":71.6, "slope":130, "par":71, "yards":6249}
 ]' WHERE slug='rcd';
 
+-- Royal Portrush (Dunluce) · par 72
+-- Black is the forward tee at Portrush.
 UPDATE courses SET tees = '[
-  {"name":"Championship","yards":7381,"rating":76.0,"slope":133},
-  {"name":"Medal",       "yards":6573,"rating":72.0,"slope":126},
-  {"name":"Yellow",      "yards":6009,"rating":69.2,"slope":121},
-  {"name":"Red",         "yards":5390,"rating":71.4,"slope":126}
+  {"name":"Blue",  "rating":76.2, "slope":140, "par":72},
+  {"name":"White", "rating":72.4, "slope":131, "par":72},
+  {"name":"Green", "rating":70.7, "slope":127, "par":72},
+  {"name":"Black", "rating":68.8, "slope":123, "par":72}
 ]' WHERE slug='portrush';
 
+-- Portstewart Strand · par 71
+-- Temp tees (Black Temp 73.2/127, Blue Temp 71.5/124) excluded — winter/temp-green setup.
 UPDATE courses SET tees = '[
-  {"name":"Championship","yards":7118,"rating":74.5,"slope":131},
-  {"name":"Medal",       "yards":6543,"rating":71.5,"slope":124},
-  {"name":"Yellow",      "yards":6020,"rating":69.0,"slope":119},
-  {"name":"Red",         "yards":5366,"rating":71.0,"slope":123}
+  {"name":"Black", "rating":74.2, "slope":131, "par":71},
+  {"name":"Blue",  "rating":72.6, "slope":127, "par":71},
+  {"name":"White", "rating":69.5, "slope":117, "par":71}
 ]' WHERE slug='portstewart';
 
+-- St Patrick's Links (Rosapenna) · par 71
 UPDATE courses SET tees = '[
-  {"name":"Championship","yards":6930,"rating":72.5,"slope":128},
-  {"name":"Medal",       "yards":6400,"rating":70.0,"slope":122},
-  {"name":"Yellow",      "yards":5900,"rating":67.8,"slope":116},
-  {"name":"Red",         "yards":5200,"rating":69.5,"slope":121}
+  {"name":"Sandstone", "rating":73.2, "slope":128, "par":71},
+  {"name":"Slate",     "rating":71.0, "slope":125, "par":71},
+  {"name":"Granite",   "rating":68.7, "slope":121, "par":71}
 ]' WHERE slug='stpats';
 
+-- Old Tom Morris Links (Rosapenna) · par 71
 UPDATE courses SET tees = '[
-  {"name":"Championship","yards":6915,"rating":71.5,"slope":125},
-  {"name":"Medal",       "yards":6380,"rating":69.5,"slope":119},
-  {"name":"Yellow",      "yards":5850,"rating":67.3,"slope":113},
-  {"name":"Red",         "yards":5150,"rating":68.8,"slope":117}
+  {"name":"Black", "rating":73.1, "slope":126, "par":71},
+  {"name":"Blue",  "rating":71.0, "slope":123, "par":71},
+  {"name":"White", "rating":69.5, "slope":121, "par":71},
+  {"name":"Red",   "rating":65.0, "slope":104, "par":71}
 ]' WHERE slug='otm';
