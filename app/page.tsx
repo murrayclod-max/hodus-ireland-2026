@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { formatDate } from '@/lib/utils';
 import type { Round, Course, Match } from '@/lib/types';
 import Countdown from '@/components/Countdown';
+import TripMap from '@/components/TripMap';
 
 export const revalidate = 60;
 
@@ -42,17 +43,17 @@ export default async function HomePage() {
 
   return (
     <div>
-      {/* Hero */}
-      <div className="page-header" style={{ paddingBottom: 'var(--s-6)' }}>
-        <div className="wrap">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s-3)', marginBottom: 'var(--s-3)' }}>
-            <Image src="/icons/icon-192.png" alt="Hodus 2026" width={40} height={40} style={{ borderRadius: 8 }} />
-            <div>
-              <h1 style={{ fontSize: '1.5rem', color: '#fff', fontFamily: 'var(--font-display)' }}>Hodus 2026</h1>
-              <p style={{ color: 'rgba(255,255,255,.65)', fontSize: '0.82rem' }}>Northern Ireland &amp; Donegal</p>
-            </div>
+      {/* ── Splash hero: HODUS 5-0 map ── */}
+      <div style={{
+        background: 'var(--green)',
+        paddingTop: 'calc(var(--s-5) + env(safe-area-inset-top))',
+        paddingBottom: 'var(--s-6)',
+      }}>
+        <div className="wrap" style={{ paddingTop: 'var(--s-4)' }}>
+          <TripMap />
+          <div style={{ marginTop: 'var(--s-5)' }}>
+            <Countdown targetDate={TRIP_START} endDate={TRIP_END} />
           </div>
-          <Countdown targetDate={TRIP_START} endDate={TRIP_END} />
         </div>
       </div>
 
@@ -113,7 +114,7 @@ export default async function HomePage() {
               { href: '/players', label: 'Players', emoji: '👥' },
               { href: '/feed', label: 'Feed', emoji: '💬' },
             ].map(({ href, label, emoji }) => (
-              <Link key={href} href={href} className="card" style={{ display: 'flex', alignItems: 'center', gap: 'var(--s-2)', fontWeight: 500 }}>
+              <Link key={href} href={href} className="card" style={{ display: 'flex', alignItems: 'center', gap: 'var(--s-2)', fontWeight: 500, touchAction: 'manipulation' }}>
                 <span style={{ fontSize: '1.3rem' }}>{emoji}</span> {label}
               </Link>
             ))}

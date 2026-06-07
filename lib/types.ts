@@ -25,7 +25,7 @@ export interface Player {
 
 export interface CourseTee {
   name: string;
-  yards: number;
+  yards?: number;
   rating: number;
   slope: number;
   par?: number;
@@ -55,6 +55,8 @@ export interface Course {
   notes_md: string | null;
   sort: number;
   tees: CourseTee[];
+  world_rank: string | null;
+  description: string | null;
 }
 
 export interface SignatureHole {

@@ -41,6 +41,16 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             <div>
               <h1 style={{ color: '#fff', fontSize: 'clamp(1.2rem,4vw,1.8rem)' }}>{course.name}</h1>
               <p style={{ color: 'rgba(255,255,255,.75)', fontSize: '0.85rem' }}>{course.location}</p>
+              {course.world_rank && (
+                <span style={{
+                  display: 'inline-block', marginTop: 6,
+                  background: 'rgba(201,162,75,0.9)', color: '#1a1200',
+                  fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em',
+                  padding: '3px 10px', borderRadius: 'var(--r-pill)',
+                }}>
+                  {course.world_rank}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -78,7 +88,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                       {tee.name}
                       {tee.si && <span title="Stroke index data available" style={{ marginLeft: 6, fontSize: 10, color: 'var(--green)' }}>SI ✓</span>}
                     </td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{tee.yards.toLocaleString()}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{tee.yards?.toLocaleString() ?? '—'}</td>
                     <td style={{ padding: '10px 12px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{tee.par ?? course.par}</td>
                     <td style={{ padding: '10px 12px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: 'var(--gilt)', fontWeight: 600 }}>{tee.rating.toFixed(1)}</td>
                     <td style={{ padding: '10px 12px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{tee.slope}</td>
