@@ -55,11 +55,14 @@ export async function POST(req: NextRequest) {
 
       if (!revisions.length) continue;
 
-      // Upsert all revisions into player_indexes
-      const rows = revisions.map(r => ({
+      // Deduplicate by revision_date (keep last value per date — GHIN can return multiple)
+      const byDate = new Map<string, number>();
+      for (const r of revisions) byDate.set(r.revisionDate, r.indexValue);
+
+      const rows = Array.from(byDate.entries()).map(([revision_date, index_value]) => ({
         player_id: player.id,
-        revision_date: r.revisionDate,
-        index_value: r.indexValue,
+        revision_date,
+        index_value,
         source: 'ghin',
       }));
 
