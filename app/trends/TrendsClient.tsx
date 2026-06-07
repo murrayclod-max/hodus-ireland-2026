@@ -24,27 +24,31 @@ const PERIOD_OPTIONS = [
 ] as const;
 type PeriodId = (typeof PERIOD_OPTIONS)[number]['id'];
 
-// Distinct colors that read well on cream background
 const PALETTE = [
-  '#4a7eb5', // blue
-  '#c9a84c', // gilt
-  '#3d9e59', // green
-  '#c84545', // red
-  '#9b59b6', // purple
-  '#e67e22', // orange
-  '#1abc9c', // teal
-  '#d81b60', // pink
-  '#607d8b', // steel
-  '#795548', // brown
-  '#00838f', // cyan
-  '#558b2f', // olive
+  '#4a7eb5',
+  '#c9a84c',
+  '#3d9e59',
+  '#c84545',
+  '#9b59b6',
+  '#e67e22',
+  '#1abc9c',
+  '#d81b60',
+  '#607d8b',
+  '#795548',
+  '#00838f',
+  '#558b2f',
 ];
 
 const TEAM_COLOR = { murray: '#3d9e59', harris: '#c84545' } as const;
+const VALID = (v: number) => v >= -10 && v <= 54;
 
 function formatIdx(v: number): string {
   if (v < 0) return `+${Math.abs(v).toFixed(1)}`;
   return v.toFixed(1);
+}
+
+function getInitials(name: string): string {
+  return name.split(' ').map(w => w[0]).filter(Boolean).join('');
 }
 
 function filterByPeriod(points: HistoryPoint[], period: PeriodId): HistoryPoint[] {
@@ -84,12 +88,14 @@ function computeTeamSeries(players: PlayerData[], team: 'murray' | 'harris', per
 type Series = {
   id: string;
   label: string;
+  initials: string;
   color: string;
   points: HistoryPoint[];
 };
 
 function MultiSeriesChart({ series }: { series: Series[] }) {
-  const W = 900, H = 380, padL = 36, padR = 16, padT = 16, padB = 30;
+  const W = 900, H = 380;
+  const padL = 52, padR = 48, padT = 16, padB = 30;
   const innerW = W - padL - padR;
   const innerH = H - padT - padB;
 
@@ -131,12 +137,12 @@ function MultiSeriesChart({ series }: { series: Series[] }) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block', maxWidth: '100%' }}>
-      {/* horizontal grid */}
+      {/* y-axis grid + tick labels */}
       {yTickVals.map((v, i) => (
         <g key={i}>
           <line x1={padL} x2={W - padR} y1={toY(v)} y2={toY(v)}
             stroke="var(--border)" strokeOpacity="0.6" />
-          <text x={padL - 5} y={toY(v)} fill="var(--mute)" fontSize="11"
+          <text x={padL - 26} y={toY(v)} fill="var(--mute)" fontSize="11"
             textAnchor="end" dominantBaseline="middle">
             {formatIdx(v)}
           </text>
@@ -150,23 +156,46 @@ function MultiSeriesChart({ series }: { series: Series[] }) {
         </text>
       ))}
 
-      {/* series */}
+      {/* series lines + start/end labels */}
       {series.map(s => {
         if (s.points.length < 2) return null;
-        const d = s.points.map((p, i) =>
+        const path = s.points.map((p, i) =>
           `${i === 0 ? 'M' : 'L'}${toX(Date.parse(p.date)).toFixed(1)},${toY(p.value).toFixed(1)}`
         ).join(' ');
-        const last = s.points[s.points.length - 1];
+
+        const first = s.points[0];
+        const last  = s.points[s.points.length - 1];
+        const firstX = toX(Date.parse(first.date));
+        const firstY = toY(first.value);
+        const lastX  = toX(Date.parse(last.date));
+        const lastY  = toY(last.value);
+
         return (
           <g key={s.id}>
-            <path d={d} fill="none" stroke={s.color} strokeWidth="2.2"
+            <path d={path} fill="none" stroke={s.color} strokeWidth="2.2"
               strokeLinejoin="round" strokeLinecap="round" />
-            <circle cx={toX(Date.parse(last.date))} cy={toY(last.value)}
-              r="4" fill={s.color} />
-            {/* end label */}
+
+            {/* start dot + initials label (left of line) */}
+            <circle cx={firstX} cy={firstY} r="3" fill={s.color} />
             <text
-              x={toX(Date.parse(last.date)) + 7}
-              y={toY(last.value)}
+              x={firstX - 5}
+              y={firstY}
+              fill={s.color}
+              fontSize="10"
+              textAnchor="end"
+              dominantBaseline="middle"
+              fontFamily="var(--font-sans)"
+              fontWeight="700"
+              letterSpacing="0.02em"
+            >
+              {s.initials}
+            </text>
+
+            {/* end dot + value label (right of line) */}
+            <circle cx={lastX} cy={lastY} r="3.5" fill={s.color} />
+            <text
+              x={lastX + 6}
+              y={lastY}
               fill={s.color}
               fontSize="10"
               dominantBaseline="middle"
@@ -182,22 +211,18 @@ function MultiSeriesChart({ series }: { series: Series[] }) {
   );
 }
 
-// ── Pills ──────────────────────────────────────────────────────────────────
+// ── Controls ───────────────────────────────────────────────────────────────
 
 function Pill({ label, active, color, onClick }: {
-  label: string;
-  active: boolean;
-  color?: string;
-  onClick: () => void;
+  label: string; active: boolean; color?: string; onClick: () => void;
 }) {
   const bg = active ? (color ?? 'var(--ink)') : 'transparent';
   const border = active ? (color ?? 'var(--ink)') : 'var(--border)';
-  const text = active ? '#fff' : 'var(--mute)';
   return (
     <button onClick={onClick} style={{
       padding: '4px 12px', borderRadius: 99,
-      border: `1px solid ${border}`,
-      background: bg, color: text,
+      border: `1px solid ${border}`, background: bg,
+      color: active ? '#fff' : 'var(--mute)',
       fontSize: 12, fontFamily: 'var(--font-sans)',
       fontWeight: active ? 600 : 400,
       letterSpacing: '0.04em', cursor: 'pointer',
@@ -209,8 +234,7 @@ function Pill({ label, active, color, onClick }: {
 }
 
 function SegmentedControl({ value, onChange }: {
-  value: 'teams' | 'players';
-  onChange: (v: 'teams' | 'players') => void;
+  value: 'teams' | 'players'; onChange: (v: 'teams' | 'players') => void;
 }) {
   const opts: { id: 'teams' | 'players'; label: string }[] = [
     { id: 'teams', label: 'Teams' },
@@ -219,8 +243,7 @@ function SegmentedControl({ value, onChange }: {
   return (
     <div style={{
       display: 'inline-flex', borderRadius: 8,
-      border: '1px solid var(--border)', overflow: 'hidden',
-      background: 'var(--white)',
+      border: '1px solid var(--border)', overflow: 'hidden', background: 'var(--white)',
     }}>
       {opts.map(o => (
         <button key={o.id} onClick={() => onChange(o.id)} style={{
@@ -230,8 +253,7 @@ function SegmentedControl({ value, onChange }: {
           border: 'none', cursor: 'pointer',
           fontFamily: 'var(--font-sans)', fontSize: 13,
           fontWeight: value === o.id ? 600 : 400,
-          letterSpacing: '0.04em',
-          transition: 'all 0.12s',
+          letterSpacing: '0.04em', transition: 'all 0.12s',
         }}>
           {o.label}
         </button>
@@ -240,10 +262,9 @@ function SegmentedControl({ value, onChange }: {
   );
 }
 
-// ── Legend (teams mode) ────────────────────────────────────────────────────
+// ── Legend ─────────────────────────────────────────────────────────────────
 
 function TeamLegend({ players }: { players: PlayerData[] }) {
-  const byTeam = { murray: players.filter(p => p.team === 'murray'), harris: players.filter(p => p.team === 'harris') };
   return (
     <div style={{ display: 'flex', gap: 32, justifyContent: 'center', flexWrap: 'wrap', marginTop: 12 }}>
       {(['murray', 'harris'] as const).map(team => (
@@ -255,7 +276,7 @@ function TeamLegend({ players }: { players: PlayerData[] }) {
             </span>
           </div>
           <div style={{ fontSize: 11, color: 'var(--mute)', fontFamily: 'var(--font-sans)' }}>
-            {byTeam[team].map(p => p.firstName).join(' · ')}
+            {players.filter(p => p.team === team).map(p => p.firstName).join(' · ')}
           </div>
         </div>
       ))}
@@ -272,14 +293,17 @@ export default function TrendsClient({ players }: { players: PlayerData[] }) {
     () => new Set(players.map(p => p.id))
   );
 
+  // Strip any bad values that slipped through before server-side guard existed
+  const cleanPlayers = useMemo(() =>
+    players.map(p => ({ ...p, history: p.history.filter(h => VALID(h.value)) })),
+    [players]
+  );
+
   function togglePlayer(id: string) {
     setActivePlayers(prev => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        if (next.size > 1) next.delete(id); // always keep at least one
-      } else {
-        next.add(id);
-      }
+      if (next.has(id)) { if (next.size > 1) next.delete(id); }
+      else next.add(id);
       return next;
     });
   }
@@ -287,44 +311,34 @@ export default function TrendsClient({ players }: { players: PlayerData[] }) {
   const series = useMemo<Series[]>(() => {
     if (view === 'teams') {
       return [
-        {
-          id: 'murray',
-          label: 'Team Murray',
-          color: TEAM_COLOR.murray,
-          points: computeTeamSeries(players, 'murray', period),
-        },
-        {
-          id: 'harris',
-          label: 'Team Harris',
-          color: TEAM_COLOR.harris,
-          points: computeTeamSeries(players, 'harris', period),
-        },
+        { id: 'murray', label: 'Team Murray', initials: 'MUR', color: TEAM_COLOR.murray,
+          points: computeTeamSeries(cleanPlayers, 'murray', period) },
+        { id: 'harris', label: 'Team Harris', initials: 'HAR', color: TEAM_COLOR.harris,
+          points: computeTeamSeries(cleanPlayers, 'harris', period) },
       ].filter(s => s.points.length > 0);
     }
 
-    // Players mode
-    return players
+    return cleanPlayers
       .filter(p => activePlayers.has(p.id) && p.history.length > 0)
       .map(p => ({
         id: p.id,
         label: p.name,
+        initials: getInitials(p.name),
         color: PALETTE[p.colorIndex % PALETTE.length],
         points: filterByPeriod(p.history, period),
       }))
       .filter(s => s.points.length > 0);
-  }, [view, period, activePlayers, players]);
+  }, [view, period, activePlayers, cleanPlayers]);
 
   return (
     <div className="stack-lg">
       <div className="board">
-        {/* Header */}
         <div className="board-title" style={{ paddingTop: 20, paddingBottom: 16 }}>
           Index Trends
         </div>
 
         <div style={{ padding: '0 var(--s-5) var(--s-5)' }}>
-
-          {/* Controls row */}
+          {/* Controls */}
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <SegmentedControl value={view} onChange={setView} />
             <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
@@ -342,14 +356,14 @@ export default function TrendsClient({ players }: { players: PlayerData[] }) {
 
           {/* Legend / toggles */}
           {view === 'teams' ? (
-            <TeamLegend players={players} />
+            <TeamLegend players={cleanPlayers} />
           ) : (
             <div style={{ marginTop: 16 }}>
               <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--mute)', marginBottom: 8, fontFamily: 'var(--font-sans)' }}>
                 Toggle players
               </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {players.map(p => {
+                {cleanPlayers.map(p => {
                   const active = activePlayers.has(p.id);
                   const color = PALETTE[p.colorIndex % PALETTE.length];
                   const hasData = p.history.length > 0;

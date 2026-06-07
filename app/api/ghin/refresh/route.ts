@@ -47,15 +47,18 @@ export async function POST(req: NextRequest) {
         return null;
       });
 
-      if (idx !== null) {
+      // Discard sentinel / out-of-range values (valid USGA range: -10 to 54)
+      const validIdx = idx !== null && idx >= -10 && idx <= 54 ? idx : null;
+
+      if (validIdx !== null) {
         // Update handicap_index on players row
         await supabase.from('players')
-          .update({ handicap_index: idx })
+          .update({ handicap_index: validIdx })
           .eq('id', player.id);
 
         // Snapshot into player_indexes
         await supabase.from('player_indexes').upsert(
-          { player_id: player.id, revision_date: today, index_value: idx, source: 'ghin' },
+          { player_id: player.id, revision_date: today, index_value: validIdx, source: 'ghin' },
           { onConflict: 'player_id,revision_date', ignoreDuplicates: false },
         );
       }

@@ -183,7 +183,10 @@ export default function PlayerIndexPanel({
   const [trendChoice, setTrendChoice] = useState('1m');
   const [period, setPeriod] = useState<PeriodId>('2y');
 
-  const sorted = useMemo(() => [...history].sort((a, b) => a.date.localeCompare(b.date)), [history]);
+  const sorted = useMemo(() =>
+    [...history].filter(p => p.value >= -10 && p.value <= 54).sort((a, b) => a.date.localeCompare(b.date)),
+    [history]
+  );
   const current = currentIndex ?? sorted[sorted.length - 1]?.value ?? null;
 
   // High/Low always over full history

@@ -56,8 +56,15 @@ export async function POST(req: NextRequest) {
       if (!revisions.length) continue;
 
       // Deduplicate by revision_date (keep last value per date — GHIN can return multiple)
+      // Discard sentinel / out-of-range values (valid USGA range: -10 to 54)
       const byDate = new Map<string, number>();
-      for (const r of revisions) byDate.set(r.revisionDate, r.indexValue);
+      for (const r of revisions) {
+        if (r.indexValue >= -10 && r.indexValue <= 54) {
+          byDate.set(r.revisionDate, r.indexValue);
+        }
+      }
+
+      if (!byDate.size) continue;
 
       const rows = Array.from(byDate.entries()).map(([revision_date, index_value]) => ({
         player_id: player.id,
