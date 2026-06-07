@@ -185,8 +185,10 @@ export async function fetchRecentGhinRounds(
     if (!datePlayed || !courseName || courseRating == null || slopeRating == null
         || ags == null || diff == null) continue;
 
-    // Only include 18-hole validated rounds
-    if (row.number_of_holes !== 18) continue;
+    // Accept any round with a valid differential (9-hole, combined, etc.)
+    // Skipping only rounds without a number_of_holes field AND no differential
+    const holes = row.number_of_holes;
+    if (holes != null && Number(holes) !== 18 && Number(holes) !== 9) continue;
 
     results.push({
       date_played: datePlayed,
