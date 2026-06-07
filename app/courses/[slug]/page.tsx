@@ -58,11 +58,18 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
       <div className="wrap stack-lg" style={{ paddingTop: 'var(--s-5)', paddingBottom: 'var(--s-6)' }}>
 
+        {/* Description */}
+        {course.description && (
+          <div className="card" style={{ borderLeft: `4px solid ${course.rail_color}` }}>
+            <p style={{ fontSize: '0.95rem', lineHeight: 1.65, color: 'var(--ink)' }}>{course.description}</p>
+          </div>
+        )}
+
         {/* Key facts */}
         <div className="card">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 'var(--s-3)', textAlign: 'center' }}>
             <div><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem' }}>{course.par}</div><div className="small muted">Par</div></div>
-            <div><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem' }}>{course.yards.toLocaleString()}</div><div className="small muted">Yards</div></div>
+            <div><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem' }}>{course.yards?.toLocaleString() ?? '—'}</div><div className="small muted">Yards</div></div>
             <div><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem' }}>{course.founded ?? '—'}</div><div className="small muted">Founded</div></div>
           </div>
           <hr className="rule" style={{ margin: 'var(--s-3) 0' }} />

@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { formatDate } from '@/lib/utils';
 import type { Round, Course, Match } from '@/lib/types';
 import Countdown from '@/components/Countdown';
-import TripMap from '@/components/TripMap';
 
 export const revalidate = 60;
 
@@ -16,12 +15,6 @@ export default async function HomePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
-
-  const { data: player } = await supabase
-    .from('players')
-    .select('*')
-    .eq('auth_user_id', user.id)
-    .maybeSingle();
 
   const today = new Date().toISOString().split('T')[0];
   const { data: rounds } = await supabase
@@ -43,17 +36,22 @@ export default async function HomePage() {
 
   return (
     <div>
-      {/* ── Splash hero: HODUS 5-0 map ── */}
+      {/* ── Splash hero: poster image ── */}
       <div style={{
         background: 'var(--green)',
-        paddingTop: 'calc(var(--s-5) + env(safe-area-inset-top))',
-        paddingBottom: 'var(--s-6)',
+        paddingTop: 'env(safe-area-inset-top)',
+        overflow: 'hidden',
       }}>
-        <div className="wrap" style={{ paddingTop: 'var(--s-4)' }}>
-          <TripMap />
-          <div style={{ marginTop: 'var(--s-5)' }}>
-            <Countdown targetDate={TRIP_START} endDate={TRIP_END} />
-          </div>
+        <Image
+          src="/hodus-cover.jpg"
+          alt="Hodus 5-0 — Northern Ireland &amp; Donegal 2026"
+          width={640}
+          height={853}
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+          priority
+        />
+        <div className="wrap" style={{ paddingTop: 'var(--s-4)', paddingBottom: 'var(--s-5)' }}>
+          <Countdown targetDate={TRIP_START} endDate={TRIP_END} />
         </div>
       </div>
 
