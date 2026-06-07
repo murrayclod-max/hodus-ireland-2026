@@ -5,7 +5,8 @@ function isPublicPath(pathname: string): boolean {
   return (
     pathname === '/login' ||
     pathname.startsWith('/auth/') ||
-    pathname.startsWith('/api/auth/')
+    pathname.startsWith('/api/auth/') ||
+    pathname.startsWith('/api/ghin/')   // authenticated via CRON_SECRET bearer token
   );
 }
 
