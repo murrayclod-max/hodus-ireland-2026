@@ -279,9 +279,9 @@ export default function MatchRoundsClient({
                         {isAdmin ? (
                           <div className="stack-xs">
                             <PlayerSlot value={ms.murrayA} allPlayers={allPlayers} isDupe={dupes.has(ms.murrayA)} ch={chM1}
-                              onChange={id => setMatchField(ri, mi, 'murrayA', id)} murrayFirst />
+                              onChange={id => setMatchField(ri, mi, 'murrayA', id)} />
                             <PlayerSlot value={ms.murrayB} allPlayers={allPlayers} isDupe={dupes.has(ms.murrayB)} ch={chM2}
-                              onChange={id => setMatchField(ri, mi, 'murrayB', id)} murrayFirst />
+                              onChange={id => setMatchField(ri, mi, 'murrayB', id)} />
                           </div>
                         ) : (
                           <div>
@@ -375,20 +375,16 @@ function PlayerChip({ player, ch, rtl }: { player?: Player; ch: number | null; r
 }
 
 function PlayerSlot({
-  value, allPlayers, isDupe, ch, onChange, murrayFirst,
+  value, allPlayers, isDupe, ch, onChange,
 }: {
   value: string;
   allPlayers: Player[];
   isDupe: boolean;
   ch: number | null;
   onChange: (id: string) => void;
-  murrayFirst?: boolean;
 }) {
   const murray = allPlayers.filter(p => p.team === 'murray');
   const harris = allPlayers.filter(p => p.team === 'harris');
-  const [first, second] = murrayFirst ? [murray, harris] : [harris, murray];
-  const firstLabel = murrayFirst ? 'Team Murray' : 'Team Harris';
-  const secondLabel = murrayFirst ? 'Team Harris' : 'Team Murray';
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -403,11 +399,11 @@ function PlayerSlot({
         }}
       >
         <option value="">— pick —</option>
-        <optgroup label={firstLabel}>
-          {first.map(p => <option key={p.id} value={p.id}>{lastName(p)}</option>)}
+        <optgroup label="Team Murray">
+          {murray.map(p => <option key={p.id} value={p.id}>{lastName(p)}</option>)}
         </optgroup>
-        <optgroup label={secondLabel}>
-          {second.map(p => <option key={p.id} value={p.id}>{lastName(p)}</option>)}
+        <optgroup label="Team Harris">
+          {harris.map(p => <option key={p.id} value={p.id}>{lastName(p)}</option>)}
         </optgroup>
       </select>
       {ch != null && (
