@@ -23,6 +23,13 @@ export interface Player {
   fun_facts: Record<string, unknown> | null;
 }
 
+export interface CourseTee {
+  name: string;
+  yards: number;
+  rating: number;
+  slope: number;
+}
+
 export interface Course {
   id: string;
   slug: string;
@@ -37,9 +44,7 @@ export interface Course {
   signature_holes: SignatureHole[];
   notes_md: string | null;
   sort: number;
-  tee_name: string | null;
-  course_rating: number | null;
-  slope_rating: number | null;
+  tees: CourseTee[];
 }
 
 export interface SignatureHole {

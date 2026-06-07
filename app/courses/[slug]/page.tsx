@@ -55,28 +55,35 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             <div><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem' }}>{course.yards.toLocaleString()}</div><div className="small muted">Yards</div></div>
             <div><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem' }}>{course.founded ?? '—'}</div><div className="small muted">Founded</div></div>
           </div>
-          {(course.course_rating != null || course.slope_rating != null) && (
-            <>
-              <hr className="rule" style={{ margin: 'var(--s-3) 0' }} />
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 'var(--s-3)', textAlign: 'center' }}>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem' }}>{course.course_rating ?? '—'}</div>
-                  <div className="small muted">Rating</div>
-                </div>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem' }}>{course.slope_rating ?? '—'}</div>
-                  <div className="small muted">Slope</div>
-                </div>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem' }}>{course.tee_name ?? '—'}</div>
-                  <div className="small muted">Tee</div>
-                </div>
-              </div>
-            </>
-          )}
           <hr className="rule" style={{ margin: 'var(--s-3) 0' }} />
           <p className="small muted">Designed by <strong>{course.designer}</strong></p>
         </div>
+
+        {/* Tee boxes */}
+        {course.tees.length > 0 && (
+          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+            <p className="section-label" style={{ padding: 'var(--s-4) var(--s-4) var(--s-2)' }}>Tee Boxes</p>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
+              <thead>
+                <tr style={{ background: 'var(--cream-dark)' }}>
+                  {['Tee', 'Yards', 'Rating', 'Slope'].map(h => (
+                    <th key={h} style={{ padding: '6px 16px', textAlign: h === 'Tee' ? 'left' : 'right', fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mute)', borderBottom: '1px solid var(--border)' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {course.tees.map((tee, i) => (
+                  <tr key={i} style={{ borderBottom: i < course.tees.length - 1 ? '1px solid var(--border-soft)' : 'none' }}>
+                    <td style={{ padding: '10px 16px', fontWeight: 600, fontFamily: 'var(--font-display)' }}>{tee.name}</td>
+                    <td style={{ padding: '10px 16px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{tee.yards.toLocaleString()}</td>
+                    <td style={{ padding: '10px 16px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: 'var(--gilt)', fontWeight: 600 }}>{tee.rating.toFixed(1)}</td>
+                    <td style={{ padding: '10px 16px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{tee.slope}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Tee times this trip */}
         {(rounds ?? []).length > 0 && (
