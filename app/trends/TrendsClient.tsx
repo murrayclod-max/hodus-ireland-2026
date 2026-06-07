@@ -24,19 +24,20 @@ const PERIOD_OPTIONS = [
 ] as const;
 type PeriodId = (typeof PERIOD_OPTIONS)[number]['id'];
 
+// All colors bright enough to read on cream/white — no dark greys or browns
 const PALETTE = [
-  '#4a7eb5',
-  '#c9a84c',
-  '#3d9e59',
-  '#c84545',
-  '#9b59b6',
-  '#e67e22',
-  '#1abc9c',
-  '#d81b60',
-  '#607d8b',
-  '#795548',
-  '#00838f',
-  '#558b2f',
+  '#2196f3', // blue         (0 Dave Harris)
+  '#c9a84c', // gilt         (1 Eric Strong)
+  '#43a047', // green        (2 Galen Archibald)
+  '#e53935', // red          (3 Jeff Pinkson)
+  '#8e24aa', // purple       (4 Jim Hughes)
+  '#fb8c00', // orange       (5 Joe Gulash)
+  '#00acc1', // cyan         (6 Dan Murray)
+  '#d81b60', // pink         (7 Jim Mitchell)
+  '#00897b', // teal         (8 Lee Einhorn)  was dark steel #607d8b
+  '#f4511e', // deep orange  (9 Matt Burns)   was dark brown #795548
+  '#5e35b1', // deep purple  (10 Matt Hodus)
+  '#7cb342', // lime green   (11 Todd Moutafian)
 ];
 
 const TEAM_COLOR = { murray: '#3d9e59', harris: '#c84545' } as const;
