@@ -11,6 +11,17 @@ const TREND_OPTIONS = [
   { id: '1y', label: '1 year',    days: 365 },
 ];
 
+const PERIOD_OPTIONS = [
+  { id: '2y',  label: '2Y',      months: 24, rounds: null },
+  { id: '1y',  label: '1Y',      months: 12, rounds: null },
+  { id: '6m',  label: '6M',      months: 6,  rounds: null },
+  { id: '3m',  label: '3M',      months: 3,  rounds: null },
+  { id: '1m',  label: '1M',      months: 1,  rounds: null },
+  { id: '20r', label: '20 Rds',  months: null, rounds: 20 },
+] as const;
+
+type PeriodId = (typeof PERIOD_OPTIONS)[number]['id'];
+
 function formatIdx(v: number | null): string {
   if (v == null) return '—';
   if (v < 0) return `+${Math.abs(v).toFixed(1)}`;
@@ -108,7 +119,7 @@ function IndexChart({ points }: { points: HistoryPoint[] }) {
   const last = points[points.length - 1];
 
   return (
-    <div style={{ marginTop: 16, overflowX: 'auto' }}>
+    <div style={{ overflowX: 'auto' }}>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ maxWidth: '100%', display: 'block' }}>
         {yTickVals.map((v, i) => {
           const y = toY(v);
@@ -131,6 +142,37 @@ function IndexChart({ points }: { points: HistoryPoint[] }) {
   );
 }
 
+function PeriodPills({ selected, onChange }: { selected: PeriodId; onChange: (id: PeriodId) => void }) {
+  return (
+    <div style={{ display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
+      {PERIOD_OPTIONS.map(o => {
+        const active = o.id === selected;
+        return (
+          <button
+            key={o.id}
+            onClick={() => onChange(o.id)}
+            style={{
+              padding: '3px 10px',
+              borderRadius: 99,
+              border: active ? '1px solid var(--gilt)' : '1px solid var(--border)',
+              background: active ? 'var(--gilt)' : 'transparent',
+              color: active ? '#fff' : 'var(--mute)',
+              fontSize: 11,
+              fontFamily: 'var(--font-sans)',
+              fontWeight: active ? 600 : 400,
+              letterSpacing: '0.04em',
+              cursor: 'pointer',
+              transition: 'all 0.12s',
+            }}
+          >
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function PlayerIndexPanel({
   history,
   currentIndex,
@@ -139,9 +181,12 @@ export default function PlayerIndexPanel({
   currentIndex: number | null;
 }) {
   const [trendChoice, setTrendChoice] = useState('1m');
+  const [period, setPeriod] = useState<PeriodId>('2y');
+
   const sorted = useMemo(() => [...history].sort((a, b) => a.date.localeCompare(b.date)), [history]);
   const current = currentIndex ?? sorted[sorted.length - 1]?.value ?? null;
 
+  // High/Low always over full history
   const high = useMemo(() => sorted.reduce<HistoryPoint | null>((h, p) => (!h || p.value > h.value) ? p : h, null), [sorted]);
   const low  = useMemo(() => sorted.reduce<HistoryPoint | null>((l, p) => (!l || p.value < l.value) ? p : l, null), [sorted]);
 
@@ -157,15 +202,39 @@ export default function PlayerIndexPanel({
     return { diff: +(current - past.value).toFixed(1) };
   }, [sorted, current, trendChoice]);
 
+  // Chart points filtered by selected period
+  const chartPoints = useMemo(() => {
+    const opt = PERIOD_OPTIONS.find(o => o.id === period) ?? PERIOD_OPTIONS[0];
+    if (opt.rounds != null) {
+      return sorted.slice(-opt.rounds);
+    }
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - opt.months!);
+    const cutoffStr = cutoff.toISOString().split('T')[0];
+    return sorted.filter(p => p.date >= cutoffStr);
+  }, [sorted, period]);
+
   return (
     <div style={{ padding: '16px 20px 20px' }}>
-      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Stat label="Current Index" value={formatIdx(current)} />
         <Stat label="High" value={high ? formatIdx(high.value) : '—'} sub={high ? formatShortDate(high.date) : undefined} />
         <Stat label="Low"  value={low  ? formatIdx(low.value)  : '—'} sub={low  ? formatShortDate(low.date)  : undefined} />
         <TrendStat trend={trend} choiceId={trendChoice} onChange={setTrendChoice} />
       </div>
-      {sorted.length > 1 && <IndexChart points={sorted} />}
+      {sorted.length > 1 && (
+        <>
+          <PeriodPills selected={period} onChange={setPeriod} />
+          <div style={{ marginTop: 12 }}>
+            {chartPoints.length > 1
+              ? <IndexChart points={chartPoints} />
+              : <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--mute)', fontSize: 13 }}>
+                  No data for this period
+                </div>
+            }
+          </div>
+        </>
+      )}
     </div>
   );
 }
