@@ -77,7 +77,7 @@ insert into players (name, first_name, handicap_index, ghin, team, is_captain, i
 ('Lee Einhorn', 'Lee', 11.4, '1317426', 'harris', false, false, null, 'Pure grinder. Gives absolutely nothing away on a golf course.', null),
 ('Jim Hughes', 'Jim', 13.5, '2376752', 'harris', false, false, null, 'Best hang of the trip. Slow player. Worth the wait.', null),
 ('Galen Archibald', 'Galen', 15.5, '10686298', 'harris', false, false, null, 'Great teammate with all-day energy. The glue guy.', null),
-('Jeff Pinkson', 'Jeff', 18.0, '107793', 'harris', false, false, null, 'Shoots 80 or 100 — no in-between. Super fit. Brings the energy.', null)
+('Jeff Pinksa', 'Jeff', 18.0, '107793', 'harris', false, false, null, 'Shoots 80 or 100 — no in-between. Super fit. Brings the energy.', null)
 on conflict do nothing;
 
 -- ── Rounds ────────────────────────────────────────────────────────

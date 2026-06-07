@@ -31,7 +31,7 @@ const USERS = [
   { email: 'lee.einhorn@hodus2026.local',     name: 'Lee Einhorn' },
   { email: 'jim.hughes@hodus2026.local',      name: 'Jim Hughes' },
   { email: 'galen.archibald@hodus2026.local', name: 'Galen Archibald' },
-  { email: 'jeff.pinkson@hodus2026.local',    name: 'Jeff Pinkson' },
+  { email: 'jeff.pinkson@hodus2026.local',    name: 'Jeff Pinksa' },
 ];
 
 const DEFAULT_PASSWORD = 'Hodus2026!';

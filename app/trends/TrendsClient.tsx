@@ -29,7 +29,7 @@ const PALETTE = [
   '#2196f3', // blue         (0 Dave Harris)
   '#c9a84c', // gilt         (1 Eric Strong)
   '#43a047', // green        (2 Galen Archibald)
-  '#e53935', // red          (3 Jeff Pinkson)
+  '#e53935', // red          (3 Jeff Pinksa)
   '#8e24aa', // purple       (4 Jim Hughes)
   '#fb8c00', // orange       (5 Joe Gulash)
   '#00acc1', // cyan         (6 Dan Murray)

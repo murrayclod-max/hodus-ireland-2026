@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -20,7 +20,6 @@ interface Props {
 
 interface MatchState {
   matchId: string;
-  formatKey: string;
   murrayPairingId: string;
   murrayA: string;
   murrayB: string;
@@ -28,10 +27,17 @@ interface MatchState {
   harrisA: string;
   harrisB: string;
 }
-interface RoundState { selectedTee: string; matches: MatchState[]; saving: boolean }
+
+// Format key is now per-round (all matches in a round share the same format)
+interface RoundState {
+  selectedTee: string;
+  formatKey: string;
+  matches: MatchState[];
+  saving: boolean;
+}
 
 function lastName(p: Player | undefined): string {
-  if (!p) return '?';
+  if (!p) return '—';
   return p.name.split(' ').pop() ?? p.name;
 }
 
@@ -53,15 +59,19 @@ export default function MatchRoundsClient({
           const sb = allPairings.find(p => p.id === b.murray_pairing_id)?.slot ?? 0;
           return sa - sb;
         });
+
+      // All matches in a round share a format — take it from the first match
+      const roundFormat = rms[0]?.game_format_key ?? 'fourball';
+
       return {
         selectedTee: round.selected_tee ?? '',
+        formatKey: roundFormat,
         saving: false,
         matches: rms.map(m => {
           const mp = allPairings.find(p => p.id === m.murray_pairing_id);
           const hp = allPairings.find(p => p.id === m.harris_pairing_id);
           return {
             matchId: m.id,
-            formatKey: m.game_format_key ?? 'fourball',
             murrayPairingId: mp?.id ?? '',
             murrayA: mp?.player_a ?? '',
             murrayB: mp?.player_b ?? '',
@@ -78,8 +88,11 @@ export default function MatchRoundsClient({
     setRoundStates(prev => prev.map((r, i) => i === ri ? fn(r) : r));
   }
 
-  function setMatch(ri: number, mi: number, fn: (ms: MatchState) => MatchState) {
-    setRound(ri, rs => ({ ...rs, matches: rs.matches.map((m, i) => i === mi ? fn(m) : m) }));
+  function setMatchField(ri: number, mi: number, field: keyof MatchState, val: string) {
+    setRound(ri, rs => ({
+      ...rs,
+      matches: rs.matches.map((m, i) => i === mi ? { ...m, [field]: val } : m),
+    }));
   }
 
   const supabase = createClient();
@@ -90,9 +103,13 @@ export default function MatchRoundsClient({
     router.refresh();
   }
 
-  async function saveFormat(matchId: string, ri: number, mi: number, key: string) {
-    setMatch(ri, mi, ms => ({ ...ms, formatKey: key }));
-    await supabase.from('matches').update({ game_format_key: key }).eq('id', matchId);
+  // Format change applies to all matches in the round at once
+  async function saveRoundFormat(ri: number, key: string) {
+    const rs = roundStates[ri];
+    setRound(ri, r => ({ ...r, formatKey: key }));
+    await Promise.all(
+      rs.matches.map(ms => supabase.from('matches').update({ game_format_key: key }).eq('id', ms.matchId))
+    );
     router.refresh();
   }
 
@@ -112,12 +129,10 @@ export default function MatchRoundsClient({
   function findPlayer(id: string) { return allPlayers.find(p => p.id === id); }
   function findFormat(key: string) { return gameFormats.find(f => f.key === key) ?? gameFormats[0]; }
 
-  function duplicateIds(rs: RoundState, team: 'murray' | 'harris'): Set<string> {
-    const ids = rs.matches.flatMap(ms =>
-      team === 'murray' ? [ms.murrayA, ms.murrayB] : [ms.harrisA, ms.harrisB]
-    ).filter(Boolean);
-    const seen = new Set<string>();
-    const dupes = new Set<string>();
+  // Duplicate check: within a round, each player should appear at most once across all pairings
+  function duplicateSet(rs: RoundState): Set<string> {
+    const ids = rs.matches.flatMap(ms => [ms.murrayA, ms.murrayB, ms.harrisA, ms.harrisB]).filter(Boolean);
+    const seen = new Set<string>(), dupes = new Set<string>();
     ids.forEach(id => { if (seen.has(id)) dupes.add(id); else seen.add(id); });
     return dupes;
   }
@@ -125,6 +140,9 @@ export default function MatchRoundsClient({
   function hasUnfilled(rs: RoundState) {
     return rs.matches.some(ms => !ms.murrayA || !ms.murrayB || !ms.harrisA || !ms.harrisB);
   }
+
+  const murrayPlayers = allPlayers.filter(p => p.team === 'murray');
+  const harrisPlayers = allPlayers.filter(p => p.team === 'harris');
 
   return (
     <div className="stack-lg">
@@ -142,16 +160,15 @@ export default function MatchRoundsClient({
         const rHarris = roundMatchData.reduce((s, m) => s + (m.status === 'final' ? Number(m.harris_points) : 0), 0);
         const hasScore = rMurray > 0 || rHarris > 0;
 
-        const murrayDupes = isAdmin ? duplicateIds(rs, 'murray') : new Set<string>();
-        const harrisDupes = isAdmin ? duplicateIds(rs, 'harris') : new Set<string>();
-        const hasDupes = murrayDupes.size > 0 || harrisDupes.size > 0;
+        const dupes = isAdmin ? duplicateSet(rs) : new Set<string>();
+        const hasDupes = dupes.size > 0;
         const canSave = !hasDupes && !hasUnfilled(rs) && !rs.saving;
 
-        const murrayPlayers = allPlayers.filter(p => p.team === 'murray');
-        const harrisPlayers = allPlayers.filter(p => p.team === 'harris');
+        const format = findFormat(rs.formatKey);
 
         return (
           <div key={round.id} className="card" style={{ borderLeft: `4px solid ${course?.rail_color ?? 'var(--gilt)'}` }}>
+
             {/* Round header */}
             <div className="row-between" style={{ marginBottom: 'var(--s-3)', flexWrap: 'wrap', gap: 'var(--s-2)' }}>
               <div>
@@ -163,7 +180,7 @@ export default function MatchRoundsClient({
                   {round.is_altshot && <span className="chip chip-gilt" style={{ marginLeft: 6 }}>Alt Shot</span>}
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s-3)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s-3)', flexWrap: 'wrap' }}>
                 {hasScore && (
                   <span>
                     <span style={{ color: 'var(--green)', fontWeight: 700 }}>{rMurray}</span>
@@ -171,7 +188,7 @@ export default function MatchRoundsClient({
                     <span style={{ color: 'var(--rail-portrush)', fontWeight: 700 }}>{rHarris}</span>
                   </span>
                 )}
-                {/* Tee selector — admin only */}
+                {/* Tee selector — admin */}
                 {isAdmin && tees.length > 0 && (
                   <select
                     value={rs.selectedTee}
@@ -185,17 +202,29 @@ export default function MatchRoundsClient({
               </div>
             </div>
 
-            {/* Tee warning */}
-            {!hasTee && (
-              <div style={{ fontSize: 12, color: 'var(--mute)', marginBottom: 'var(--s-3)', padding: 'var(--s-2) var(--s-3)', background: 'var(--cream-dark)', borderRadius: 'var(--r-sm)' }}>
-                {isAdmin ? '⚠ Select a tee above to enable handicap calculations' : '⚠ Tee not yet selected — handicaps pending'}
-              </div>
-            )}
+            {/* Format — one per round */}
+            <div style={{ marginBottom: 'var(--s-3)', display: 'flex', alignItems: 'center', gap: 'var(--s-3)' }}>
+              {isAdmin ? (
+                <select
+                  value={rs.formatKey}
+                  onChange={e => saveRoundFormat(ri, e.target.value)}
+                  style={{ fontSize: 12, padding: '4px 8px', borderRadius: 'var(--r-sm)', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer' }}
+                >
+                  {gameFormats.map(f => <option key={f.key} value={f.key}>{f.name}</option>)}
+                </select>
+              ) : (
+                <span className="chip chip-neutral" style={{ fontSize: 11 }}>{format?.name ?? rs.formatKey}</span>
+              )}
+              {!hasTee && (
+                <span style={{ fontSize: 12, color: 'var(--mute)', fontStyle: 'italic' }}>
+                  {isAdmin ? '⚠ Select tee to enable handicaps' : '⚠ Tee pending'}
+                </span>
+              )}
+            </div>
 
             {/* Matches */}
             <div className="stack-sm">
               {rs.matches.map((ms, mi) => {
-                const format = findFormat(ms.formatKey);
                 const pM1 = findPlayer(ms.murrayA);
                 const pM2 = findPlayer(ms.murrayB);
                 const pH1 = findPlayer(ms.harrisA);
@@ -205,38 +234,31 @@ export default function MatchRoundsClient({
                 const chM2 = hasTee && pM2?.handicap_index != null ? courseHandicap(pM2.handicap_index, teeObj!.slope, teeObj!.rating, teePar) : null;
                 const chH1 = hasTee && pH1?.handicap_index != null ? courseHandicap(pH1.handicap_index, teeObj!.slope, teeObj!.rating, teePar) : null;
                 const chH2 = hasTee && pH2?.handicap_index != null ? courseHandicap(pH2.handicap_index, teeObj!.slope, teeObj!.rating, teePar) : null;
-
                 const allCHs = chM1 != null && chM2 != null && chH1 != null && chH2 != null;
 
                 let strokesSummary: string | null = null;
-                let strokeHoleList: { label: string; holes: number[] } | null = null;
+                let strokeHoleList: { holes: number[] } | null = null;
 
                 if (allCHs) {
-                  const params = format.params;
-                  if (ms.formatKey === 'fourball') {
+                  const params = format?.params ?? { pct: 90 };
+                  if (rs.formatKey === 'fourball') {
                     const s = fourballStrokes(chM1!, chM2!, chH1!, chH2!, (params.pct as number) ?? 90);
-                    const si = teeObj?.si;
                     const parts = [
                       s.m1 > 0 ? `${lastName(pM1)} +${s.m1}` : null,
                       s.m2 > 0 ? `${lastName(pM2)} +${s.m2}` : null,
                       s.h1 > 0 ? `${lastName(pH1)} +${s.h1}` : null,
                       s.h2 > 0 ? `${lastName(pH2)} +${s.h2}` : null,
                     ].filter(Boolean);
-                    strokesSummary = parts.length ? parts.join(' · ') : 'Level — no strokes given';
-                    // Show stroke holes for the highest-stroke player (simplification)
-                    const maxStrokes = Math.max(s.m1, s.m2, s.h1, s.h2);
-                    if (si && maxStrokes > 0) {
-                      strokeHoleList = { label: `${maxStrokes} stroke${maxStrokes > 1 ? 's' : ''} on`, holes: strokeHoles(si, maxStrokes) };
-                    }
+                    strokesSummary = parts.length ? parts.join(' · ') : 'Level — no strokes';
+                    const maxS = Math.max(s.m1, s.m2, s.h1, s.h2);
+                    if (teeObj?.si && maxS > 0) strokeHoleList = { holes: strokeHoles(teeObj.si, maxS) };
                   } else {
                     const res = combinedMatchStrokes(chM1!, chM2!, chH1!, chH2!, params as Record<string, number>);
-                    const sTeam = res.receiver === 'murray' ? 'Murray' : res.receiver === 'harris' ? 'Harris' : null;
-                    strokesSummary = res.receiver === 'level'
-                      ? `Level — Murray PH ${res.murrayPH} · Harris PH ${res.harrisPH}`
-                      : `Team ${sTeam} receives ${res.strokes} stroke${res.strokes !== 1 ? 's' : ''} · Murray PH ${res.murrayPH} · Harris PH ${res.harrisPH}`;
-                    if (teeObj?.si && res.strokes > 0) {
-                      strokeHoleList = { label: `Stroke${res.strokes > 1 ? 's' : ''} on`, holes: strokeHoles(teeObj.si, res.strokes) };
-                    }
+                    const recv = res.receiver === 'murray' ? 'Murray' : res.receiver === 'harris' ? 'Harris' : null;
+                    strokesSummary = recv
+                      ? `Team ${recv} +${res.strokes} · Murray PH ${res.murrayPH} · Harris PH ${res.harrisPH}`
+                      : `Level · Murray PH ${res.murrayPH} · Harris PH ${res.harrisPH}`;
+                    if (teeObj?.si && res.strokes > 0) strokeHoleList = { holes: strokeHoles(teeObj.si, res.strokes) };
                   }
                 }
 
@@ -249,44 +271,17 @@ export default function MatchRoundsClient({
                     border: '1px solid var(--border-soft)',
                     borderRadius: 'var(--r-md)',
                     padding: 'var(--s-3)',
-                    background: 'var(--surface)',
                   }}>
-                    {/* Format selector (admin) */}
-                    {isAdmin && (
-                      <div style={{ marginBottom: 'var(--s-2)' }}>
-                        <select
-                          value={ms.formatKey}
-                          onChange={e => saveFormat(ms.matchId, ri, mi, e.target.value)}
-                          style={{ fontSize: 11, padding: '3px 6px', borderRadius: 'var(--r-sm)', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', color: 'var(--mute)' }}
-                        >
-                          {gameFormats.map(f => <option key={f.key} value={f.key}>{f.name}</option>)}
-                        </select>
-                      </div>
-                    )}
-                    {!isAdmin && (
-                      <div style={{ fontSize: 11, color: 'var(--mute)', marginBottom: 'var(--s-1)', fontWeight: 500 }}>{format.name}</div>
-                    )}
-
-                    {/* Player slots */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 'var(--s-2)', alignItems: 'center' }}>
+
                       {/* Murray pair */}
                       <div>
                         {isAdmin ? (
                           <div className="stack-xs">
-                            <PlayerSlot
-                              value={ms.murrayA}
-                              players={murrayPlayers}
-                              isDupe={murrayDupes.has(ms.murrayA)}
-                              ch={chM1}
-                              onChange={id => setMatch(ri, mi, m => ({ ...m, murrayA: id }))}
-                            />
-                            <PlayerSlot
-                              value={ms.murrayB}
-                              players={murrayPlayers}
-                              isDupe={murrayDupes.has(ms.murrayB)}
-                              ch={chM2}
-                              onChange={id => setMatch(ri, mi, m => ({ ...m, murrayB: id }))}
-                            />
+                            <PlayerSlot value={ms.murrayA} allPlayers={allPlayers} isDupe={dupes.has(ms.murrayA)} ch={chM1}
+                              onChange={id => setMatchField(ri, mi, 'murrayA', id)} murrayFirst />
+                            <PlayerSlot value={ms.murrayB} allPlayers={allPlayers} isDupe={dupes.has(ms.murrayB)} ch={chM2}
+                              onChange={id => setMatchField(ri, mi, 'murrayB', id)} murrayFirst />
                           </div>
                         ) : (
                           <div>
@@ -300,9 +295,11 @@ export default function MatchRoundsClient({
                         )}
                       </div>
 
-                      {/* Score or vs badge */}
+                      {/* Score or vs */}
                       <div style={{ textAlign: 'center' }}>
-                        <span className={`chip ${isFinal ? (Number(matchRow?.murray_points ?? 0) > Number(matchRow?.harris_points ?? 0) ? 'chip-success' : Number(matchRow?.harris_points ?? 0) > Number(matchRow?.murray_points ?? 0) ? 'chip-danger' : 'chip-gilt') : isLive ? 'chip-danger' : 'chip-neutral'}`} style={{ fontSize: '0.7rem' }}>
+                        <span className={`chip ${isFinal
+                          ? (Number(matchRow!.murray_points) > Number(matchRow!.harris_points) ? 'chip-success' : Number(matchRow!.harris_points) > Number(matchRow!.murray_points) ? 'chip-danger' : 'chip-gilt')
+                          : isLive ? 'chip-danger' : 'chip-neutral'}`} style={{ fontSize: '0.7rem' }}>
                           {isFinal ? `${matchRow!.murray_points}–${matchRow!.harris_points}` : isLive ? 'LIVE' : 'vs'}
                         </span>
                       </div>
@@ -311,27 +308,17 @@ export default function MatchRoundsClient({
                       <div style={{ textAlign: 'right' }}>
                         {isAdmin ? (
                           <div className="stack-xs" style={{ alignItems: 'flex-end' }}>
-                            <PlayerSlot
-                              value={ms.harrisA}
-                              players={harrisPlayers}
-                              isDupe={harrisDupes.has(ms.harrisA)}
-                              ch={chH1}
-                              onChange={id => setMatch(ri, mi, m => ({ ...m, harrisA: id }))}
-                            />
-                            <PlayerSlot
-                              value={ms.harrisB}
-                              players={harrisPlayers}
-                              isDupe={harrisDupes.has(ms.harrisB)}
-                              ch={chH2}
-                              onChange={id => setMatch(ri, mi, m => ({ ...m, harrisB: id }))}
-                            />
+                            <PlayerSlot value={ms.harrisA} allPlayers={allPlayers} isDupe={dupes.has(ms.harrisA)} ch={chH1}
+                              onChange={id => setMatchField(ri, mi, 'harrisA', id)} />
+                            <PlayerSlot value={ms.harrisB} allPlayers={allPlayers} isDupe={dupes.has(ms.harrisB)} ch={chH2}
+                              onChange={id => setMatchField(ri, mi, 'harrisB', id)} />
                           </div>
                         ) : (
                           <div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--rail-portrush)', fontWeight: 500 }}>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--rail-portrush)', fontWeight: 500, textAlign: 'right' }}>
                               <PlayerChip player={pH1} ch={chH1} rtl />
                             </div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--rail-portrush)', fontWeight: 500 }}>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--rail-portrush)', fontWeight: 500, textAlign: 'right' }}>
                               <PlayerChip player={pH2} ch={chH2} rtl />
                             </div>
                           </div>
@@ -343,16 +330,9 @@ export default function MatchRoundsClient({
                     {strokesSummary && (
                       <div style={{ marginTop: 'var(--s-2)', fontSize: 11, color: 'var(--mute)', borderTop: '1px solid var(--border-soft)', paddingTop: 'var(--s-2)' }}>
                         {strokesSummary}
-                        {strokeHoleList && (
-                          <span style={{ marginLeft: 6 }}>
-                            · {strokeHoleList.label}: {strokeHoleList.holes.join(', ')}
-                          </span>
+                        {strokeHoleList && strokeHoleList.holes.length > 0 && (
+                          <span style={{ marginLeft: 6 }}>· holes {strokeHoleList.holes.join(', ')}</span>
                         )}
-                      </div>
-                    )}
-                    {hasTee && !allCHs && (
-                      <div style={{ marginTop: 'var(--s-2)', fontSize: 11, color: 'var(--mute)', fontStyle: 'italic' }}>
-                        Handicap index missing for one or more players
                       </div>
                     )}
                   </div>
@@ -360,23 +340,18 @@ export default function MatchRoundsClient({
               })}
             </div>
 
-            {/* Admin: save pairings + dupe warning */}
+            {/* Admin: save pairings */}
             {isAdmin && (
               <div style={{ marginTop: 'var(--s-3)', display: 'flex', alignItems: 'center', gap: 'var(--s-3)', flexWrap: 'wrap' }}>
                 {hasDupes && (
-                  <span style={{ fontSize: 12, color: '#c84545', fontWeight: 600 }}>⚠ Duplicate player in round — resolve before saving</span>
+                  <span style={{ fontSize: 12, color: '#c84545', fontWeight: 600 }}>⚠ Duplicate player — resolve before saving</span>
                 )}
-                <button
-                  onClick={() => savePairings(ri)}
-                  disabled={!canSave}
-                  className="btn btn-secondary btn-sm"
-                >
+                <button onClick={() => savePairings(ri)} disabled={!canSave} className="btn btn-secondary btn-sm">
                   {rs.saving ? 'Saving…' : 'Save Pairings'}
                 </button>
               </div>
             )}
 
-            {/* Score link */}
             <Link href={`/match/${round.id}`} className="btn btn-primary btn-block btn-sm" style={{ marginTop: 'var(--s-3)' }}>
               {roundMatchData.some(m => m.status === 'live') ? '⚡ Live Scoring' :
                 roundMatchData.some(m => m.status === 'final') ? 'View Results' : 'Score This Round'}
@@ -391,7 +366,7 @@ export default function MatchRoundsClient({
 function PlayerChip({ player, ch, rtl }: { player?: Player; ch: number | null; rtl?: boolean }) {
   const name = player ? lastName(player) : '—';
   const badge = ch != null ? (
-    <span style={{ fontSize: 10, background: 'var(--cream-dark)', borderRadius: 'var(--r-sm)', padding: '1px 4px', color: 'var(--mute)', fontVariantNumeric: 'tabular-nums', marginLeft: 4 }}>
+    <span style={{ fontSize: 10, background: 'var(--cream-dark)', borderRadius: 'var(--r-sm)', padding: '1px 4px', color: 'var(--mute)', fontVariantNumeric: 'tabular-nums', marginLeft: rtl ? 0 : 4, marginRight: rtl ? 4 : 0 }}>
       CH {ch}
     </span>
   ) : null;
@@ -400,14 +375,21 @@ function PlayerChip({ player, ch, rtl }: { player?: Player; ch: number | null; r
 }
 
 function PlayerSlot({
-  value, players, isDupe, ch, onChange,
+  value, allPlayers, isDupe, ch, onChange, murrayFirst,
 }: {
   value: string;
-  players: Player[];
+  allPlayers: Player[];
   isDupe: boolean;
   ch: number | null;
   onChange: (id: string) => void;
+  murrayFirst?: boolean;
 }) {
+  const murray = allPlayers.filter(p => p.team === 'murray');
+  const harris = allPlayers.filter(p => p.team === 'harris');
+  const [first, second] = murrayFirst ? [murray, harris] : [harris, murray];
+  const firstLabel = murrayFirst ? 'Team Murray' : 'Team Harris';
+  const secondLabel = murrayFirst ? 'Team Harris' : 'Team Murray';
+
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
       <select
@@ -417,11 +399,16 @@ function PlayerSlot({
           fontSize: 12, padding: '3px 6px', borderRadius: 'var(--r-sm)',
           border: `1px solid ${isDupe ? '#c84545' : 'var(--border)'}`,
           background: isDupe ? 'rgba(200,69,69,.06)' : 'var(--surface)',
-          cursor: 'pointer', color: isDupe ? '#c84545' : 'inherit', minWidth: 90,
+          cursor: 'pointer', color: isDupe ? '#c84545' : 'inherit', minWidth: 95,
         }}
       >
         <option value="">— pick —</option>
-        {players.map(p => <option key={p.id} value={p.id}>{lastName(p)}</option>)}
+        <optgroup label={firstLabel}>
+          {first.map(p => <option key={p.id} value={p.id}>{lastName(p)}</option>)}
+        </optgroup>
+        <optgroup label={secondLabel}>
+          {second.map(p => <option key={p.id} value={p.id}>{lastName(p)}</option>)}
+        </optgroup>
       </select>
       {ch != null && (
         <span style={{ fontSize: 10, color: 'var(--mute)', fontVariantNumeric: 'tabular-nums' }}>CH {ch}</span>

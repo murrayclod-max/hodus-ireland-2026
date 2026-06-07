@@ -22,7 +22,7 @@ begin
   select id into p_lee     from players where name='Lee Einhorn';
   select id into p_hughes  from players where name='Jim Hughes';
   select id into p_galen   from players where name='Galen Archibald';
-  select id into p_jeff    from players where name='Jeff Pinkson';
+  select id into p_jeff    from players where name='Jeff Pinksa';
 
   select id into r1 from rounds where round_no=1;
   select id into r2 from rounds where round_no=2;
