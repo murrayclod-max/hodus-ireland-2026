@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import type { Player } from '@/lib/types';
 import ProfileEditor from './ProfileEditor';
+import ChangePasswordForm from './ChangePasswordForm';
 
 export const revalidate = 0;
 
@@ -29,6 +30,8 @@ export default async function SettingsPage() {
             <p>Your account is not linked to a player yet. Contact Dan Murray.</p>
           </div>
         )}
+
+        <ChangePasswordForm email={user.email ?? ''} />
 
         {/* Sign out */}
         <form action="/api/auth/sign-out" method="post">
