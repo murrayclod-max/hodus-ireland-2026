@@ -66,18 +66,22 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
               <thead>
                 <tr style={{ background: 'var(--cream-dark)' }}>
-                  {['Tee', 'Yards', 'Rating', 'Slope'].map(h => (
-                    <th key={h} style={{ padding: '6px 16px', textAlign: h === 'Tee' ? 'left' : 'right', fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mute)', borderBottom: '1px solid var(--border)' }}>{h}</th>
+                  {['Tee', 'Yards', 'Par', 'Rating', 'Slope'].map(h => (
+                    <th key={h} style={{ padding: '6px 12px', textAlign: h === 'Tee' ? 'left' : 'right', fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--mute)', borderBottom: '1px solid var(--border)' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {course.tees.map((tee, i) => (
                   <tr key={i} style={{ borderBottom: i < course.tees.length - 1 ? '1px solid var(--border-soft)' : 'none' }}>
-                    <td style={{ padding: '10px 16px', fontWeight: 600, fontFamily: 'var(--font-display)' }}>{tee.name}</td>
-                    <td style={{ padding: '10px 16px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{tee.yards.toLocaleString()}</td>
-                    <td style={{ padding: '10px 16px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: 'var(--gilt)', fontWeight: 600 }}>{tee.rating.toFixed(1)}</td>
-                    <td style={{ padding: '10px 16px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{tee.slope}</td>
+                    <td style={{ padding: '10px 12px', fontWeight: 600, fontFamily: 'var(--font-display)' }}>
+                      {tee.name}
+                      {tee.si && <span title="Stroke index data available" style={{ marginLeft: 6, fontSize: 10, color: 'var(--green)' }}>SI ✓</span>}
+                    </td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{tee.yards.toLocaleString()}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{tee.par ?? course.par}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: 'var(--gilt)', fontWeight: 600 }}>{tee.rating.toFixed(1)}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{tee.slope}</td>
                   </tr>
                 ))}
               </tbody>

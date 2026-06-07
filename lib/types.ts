@@ -28,6 +28,16 @@ export interface CourseTee {
   yards: number;
   rating: number;
   slope: number;
+  par?: number;
+  si?: number[];
+}
+
+export interface GameFormat {
+  key: string;
+  name: string;
+  params: Record<string, number>;
+  notes_md: string | null;
+  sort: number;
 }
 
 export interface Course {
@@ -72,6 +82,7 @@ export interface Round {
   tee_time: string;
   format: RoundFormat;
   is_altshot: boolean;
+  selected_tee: string | null;
   courses?: Course;
 }
 
@@ -96,6 +107,7 @@ export interface Match {
   murray_points: number;
   harris_points: number;
   notes: string | null;
+  game_format_key: string;
 }
 
 export interface HoleResultRow {

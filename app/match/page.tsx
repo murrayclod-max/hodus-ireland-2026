@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import type { Match, Round, Course, Pairing, Player } from '@/lib/types';
+import type { Match, Round, Course, Pairing, Player, GameFormat } from '@/lib/types';
+import MatchRoundsClient from './MatchRoundsClient';
 
 export const revalidate = 30;
 
@@ -14,36 +14,27 @@ export default async function MatchPage() {
     .from('players').select('id, is_admin').eq('auth_user_id', user.id).maybeSingle();
   const isAdmin = !!me?.is_admin;
 
-  const { data: rounds } = await supabase
-    .from('rounds').select('*, courses(*)').order('round_no') as { data: (Round & { courses: Course })[] | null };
-
-  const { data: allMatches } = await supabase
-    .from('matches').select('*') as { data: Match[] | null };
-
-  const { data: allPairings } = await supabase
-    .from('pairings')
-    .select('*, player_a_data:players!player_a(id,name,first_name), player_b_data:players!player_b(id,name,first_name)') as { data: any[] | null };
-
-  const { data: settings } = await supabase.from('trip_settings').select('*').eq('id', 1).maybeSingle();
+  const [
+    { data: rounds },
+    { data: allMatches },
+    { data: allPairings },
+    { data: allPlayers },
+    { data: gameFormats },
+    { data: settings },
+    { data: aces },
+  ] = await Promise.all([
+    supabase.from('rounds').select('*, courses(*)').order('round_no') as unknown as Promise<{ data: (Round & { courses: Course })[] | null }>,
+    supabase.from('matches').select('*') as unknown as Promise<{ data: Match[] | null }>,
+    supabase.from('pairings').select('*, player_a_data:players!player_a(id,name,first_name,handicap_index,team), player_b_data:players!player_b(id,name,first_name,handicap_index,team)') as unknown as Promise<{ data: any[] | null }>,
+    supabase.from('players').select('id,name,first_name,handicap_index,team,is_captain,is_admin,auth_user_id,avatar_url,bio,home_club,nickname,phone,ghin,fun_facts').order('team').order('name') as unknown as Promise<{ data: Player[] | null }>,
+    supabase.from('game_formats').select('*').order('sort') as unknown as Promise<{ data: GameFormat[] | null }>,
+    supabase.from('trip_settings').select('*').eq('id', 1).maybeSingle(),
+    supabase.from('aces').select('*, players(name), rounds(round_no, courses(name))') as unknown as Promise<{ data: any[] | null }>,
+  ]);
 
   const murrayTotal = (allMatches ?? []).filter(m => m.status === 'final').reduce((s, m) => s + Number(m.murray_points), 0);
   const harrisTotal = (allMatches ?? []).filter(m => m.status === 'final').reduce((s, m) => s + Number(m.harris_points), 0);
   const totalPts = murrayTotal + harrisTotal || 1;
-
-  function getPairings(roundId: string, team: 'murray' | 'harris') {
-    return (allPairings ?? []).filter(p => p.round_id === roundId && p.team === team).sort((a, b) => a.slot - b.slot);
-  }
-
-  function getMatches(roundId: string) {
-    return (allMatches ?? []).filter(m => m.round_id === roundId);
-  }
-
-  function pairingNames(p: any) {
-    return `${p.player_a_data?.name?.split(' ').pop() ?? '?'} & ${p.player_b_data?.name?.split(' ').pop() ?? '?'}`;
-  }
-
-  const { data: aces } = await supabase
-    .from('aces').select('*, players(name), rounds(round_no, courses(name))') as { data: any[] | null };
 
   return (
     <div>
@@ -78,68 +69,15 @@ export default async function MatchPage() {
           )}
         </div>
 
-        {/* Round-by-round */}
-        {(rounds ?? []).map(round => {
-          const roundMatches = getMatches(round.id);
-          const murrayPairings = getPairings(round.id, 'murray');
-          const harrisPairings = getPairings(round.id, 'harris');
-          const roundMurrayPts = roundMatches.filter(m => m.status === 'final').reduce((s, m) => s + Number(m.murray_points), 0);
-          const roundHarrisPts = roundMatches.filter(m => m.status === 'final').reduce((s, m) => s + Number(m.harris_points), 0);
-
-          return (
-            <div key={round.id} className="card" style={{ borderLeft: `4px solid ${round.courses?.rail_color ?? 'var(--gilt)'}` }}>
-              <div className="row-between" style={{ marginBottom: 'var(--s-3)' }}>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem' }}>
-                    Round {round.round_no} — {round.courses?.name}
-                  </div>
-                  <div className="small muted">
-                    {new Date(round.play_date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} · {round.tee_time}
-                    {round.is_altshot && <span className="chip chip-gilt" style={{ marginLeft: 6 }}>Alt Shot</span>}
-                  </div>
-                </div>
-                {(roundMurrayPts > 0 || roundHarrisPts > 0) && (
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ color: 'var(--green)', fontWeight: 700 }}>{roundMurrayPts}</span>
-                    <span className="muted"> – </span>
-                    <span style={{ color: 'var(--rail-portrush)', fontWeight: 700 }}>{roundHarrisPts}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Pairings grid */}
-              {murrayPairings.length > 0 && (
-                <div style={{ marginBottom: 'var(--s-3)' }}>
-                  <p className="section-label" style={{ marginBottom: 'var(--s-2)' }}>Pairings</p>
-                  <div className="stack-sm">
-                    {murrayPairings.map((mp, i) => {
-                      const hp = harrisPairings[i];
-                      const match = roundMatches.find(m =>
-                        m.murray_pairing_id === mp.id && m.harris_pairing_id === hp?.id
-                      );
-                      return (
-                        <div key={mp.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 'var(--s-2)', alignItems: 'center', fontSize: '0.85rem' }}>
-                          <span style={{ color: 'var(--green)', fontWeight: 500 }}>{pairingNames(mp)}</span>
-                          <span className={`chip ${match?.status === 'final' ? (Number(match.murray_points) > Number(match.harris_points) ? 'chip-success' : Number(match.harris_points) > Number(match.murray_points) ? 'chip-danger' : 'chip-gilt') : 'chip-neutral'}`} style={{ fontSize: '0.7rem' }}>
-                            {match?.status === 'final'
-                              ? `${match.murray_points}–${match.harris_points}`
-                              : match?.status === 'live' ? 'LIVE' : 'vs'}
-                          </span>
-                          <span style={{ color: 'var(--rail-portrush)', fontWeight: 500, textAlign: 'right' }}>{hp ? pairingNames(hp) : '—'}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <Link href={`/match/${round.id}`} className="btn btn-primary btn-block btn-sm">
-                {roundMatches.some(m => m.status === 'live') ? '⚡ Live Scoring' :
-                  roundMatches.some(m => m.status === 'final') ? 'View Results' : 'Score This Round'}
-              </Link>
-            </div>
-          );
-        })}
+        {/* Round cards — client component handles both read-only and admin setup */}
+        <MatchRoundsClient
+          rounds={(rounds ?? []) as any}
+          allMatches={allMatches ?? []}
+          allPairings={allPairings ?? []}
+          allPlayers={allPlayers ?? []}
+          gameFormats={gameFormats ?? []}
+          isAdmin={isAdmin}
+        />
 
         {/* Ace pool */}
         <div className="card" style={{ borderColor: 'var(--gilt)', background: 'rgba(201,162,75,.05)' }}>
@@ -161,7 +99,7 @@ export default async function MatchPage() {
           )}
         </div>
 
-        {/* Rules link */}
+        {/* Rules */}
         {settings?.rules_md && (
           <div className="card">
             <p className="section-label" style={{ marginBottom: 'var(--s-3)' }}>Rules</p>
