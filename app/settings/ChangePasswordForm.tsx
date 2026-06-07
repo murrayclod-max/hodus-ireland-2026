@@ -39,6 +39,9 @@ export default function ChangePasswordForm({ email }: { email: string }) {
       return;
     }
 
+    // Clear forced-reset flag if present
+    await supabase.from('players').update({ must_reset_password: false }).eq('auth_user_id', (await supabase.auth.getUser()).data.user?.id ?? '');
+
     setStatus('done');
     setCurrent(''); setNext(''); setConfirm('');
     setTimeout(() => { setStatus('idle'); setOpen(false); }, 2500);

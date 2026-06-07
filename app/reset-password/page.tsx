@@ -31,6 +31,12 @@ export default function ResetPasswordPage() {
       setError(err.message);
       return;
     }
+    // Clear the forced-reset flag
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from('players').update({ must_reset_password: false }).eq('auth_user_id', user.id);
+    }
+
     setStatus('done');
     setTimeout(() => router.replace('/'), 2000);
   }

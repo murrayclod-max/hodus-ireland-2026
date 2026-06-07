@@ -21,6 +21,7 @@ export interface Player {
   nickname: string | null;
   phone: string | null;
   fun_facts: Record<string, unknown> | null;
+  must_reset_password: boolean;
 }
 
 export interface CourseTee {
