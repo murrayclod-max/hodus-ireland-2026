@@ -55,6 +55,25 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             <div><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem' }}>{course.yards.toLocaleString()}</div><div className="small muted">Yards</div></div>
             <div><div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem' }}>{course.founded ?? '—'}</div><div className="small muted">Founded</div></div>
           </div>
+          {(course.course_rating != null || course.slope_rating != null) && (
+            <>
+              <hr className="rule" style={{ margin: 'var(--s-3) 0' }} />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 'var(--s-3)', textAlign: 'center' }}>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem' }}>{course.course_rating ?? '—'}</div>
+                  <div className="small muted">Rating</div>
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem' }}>{course.slope_rating ?? '—'}</div>
+                  <div className="small muted">Slope</div>
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.3rem' }}>{course.tee_name ?? '—'}</div>
+                  <div className="small muted">Tee</div>
+                </div>
+              </div>
+            </>
+          )}
           <hr className="rule" style={{ margin: 'var(--s-3) 0' }} />
           <p className="small muted">Designed by <strong>{course.designer}</strong></p>
         </div>

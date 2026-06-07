@@ -37,6 +37,9 @@ export interface Course {
   signature_holes: SignatureHole[];
   notes_md: string | null;
   sort: number;
+  tee_name: string | null;
+  course_rating: number | null;
+  slope_rating: number | null;
 }
 
 export interface SignatureHole {
