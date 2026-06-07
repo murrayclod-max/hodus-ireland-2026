@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import type { Match, Round, Course, Pairing, Player, GameFormat } from '@/lib/types';
 import MatchRoundsClient from './MatchRoundsClient';
+import GameFormatsEditor from './GameFormatsEditor';
 
 export const revalidate = 30;
 
@@ -107,6 +108,11 @@ export default async function MatchPage() {
               {settings.rules_md.replace(/^#+\s*/gm, '').replace(/\*\*/g, '')}
             </div>
           </div>
+        )}
+
+        {/* Admin: format handicap % editor */}
+        {isAdmin && (gameFormats ?? []).length > 0 && (
+          <GameFormatsEditor formats={gameFormats ?? []} />
         )}
       </div>
     </div>
