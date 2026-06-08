@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect, notFound } from 'next/navigation';
-import Image from 'next/image';
 import type { Course, Round, SignatureHole } from '@/lib/types';
 import CourseEditPanel from './CourseEditPanel';
 
@@ -31,13 +30,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
     <div>
       {/* Hero banner */}
       <div style={{ position: 'relative', height: 200, background: course.rail_color, overflow: 'hidden' }}>
-        <Image src={bannerPath} alt={course.name} fill style={{ objectFit: 'cover', opacity: 0.7 }} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={bannerPath} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }} />
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, ${course.rail_color}88, ${course.rail_color})` }} />
         <div style={{ position: 'absolute', bottom: 'var(--s-4)', left: 'var(--s-4)', right: 'var(--s-4)', color: '#fff' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s-3)' }}>
             {course.crest_url && (
-              <div style={{ width: 56, height: 56, borderRadius: '50%', border: '2px solid rgba(255,255,255,.35)', background: '#fff', overflow: 'hidden', flexShrink: 0 }}>
-                <Image src={course.crest_url} alt="" width={56} height={56} style={{ objectFit: 'contain', width: '100%', height: '100%' }} />
+              <div style={{ width: 60, height: 60, borderRadius: '50%', border: '2.5px solid rgba(255,255,255,.5)', background: '#fff', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={course.crest_url} alt="" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
               </div>
             )}
             <div>
