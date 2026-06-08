@@ -34,6 +34,7 @@ interface RoundState {
   formatKey: string;
   matches: MatchState[];
   saving: boolean;
+  inCompetition: boolean;
 }
 
 function lastName(p: Player | undefined): string {
@@ -67,6 +68,7 @@ export default function MatchRoundsClient({
         selectedTee: round.selected_tee ?? '',
         formatKey: roundFormat,
         saving: false,
+        inCompetition: round.in_competition,
         matches: rms.map(m => {
           const mp = allPairings.find(p => p.id === m.murray_pairing_id);
           const hp = allPairings.find(p => p.id === m.harris_pairing_id);
@@ -110,6 +112,12 @@ export default function MatchRoundsClient({
     await Promise.all(
       rs.matches.map(ms => supabase.from('matches').update({ game_format_key: key }).eq('id', ms.matchId))
     );
+    router.refresh();
+  }
+
+  async function toggleCompetition(roundId: string, ri: number, val: boolean) {
+    setRound(ri, r => ({ ...r, inCompetition: val }));
+    await supabase.from('rounds').update({ in_competition: val }).eq('id', roundId);
     router.refresh();
   }
 
@@ -172,8 +180,16 @@ export default function MatchRoundsClient({
             {/* Round header */}
             <div className="row-between" style={{ marginBottom: 'var(--s-3)', flexWrap: 'wrap', gap: 'var(--s-2)' }}>
               <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem' }}>
-                  Round {round.round_no} — {course?.name}
+                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: 'var(--s-2)', flexWrap: 'wrap' }}>
+                  {rs.inCompetition ? `Round ${round.round_no}` : 'Appetizer'} — {course?.name}
+                  {!rs.inCompetition && (
+                    <span style={{
+                      fontSize: '0.65rem', fontFamily: 'var(--font-sans)', fontWeight: 600,
+                      letterSpacing: '0.05em', background: 'rgba(201,162,75,0.18)',
+                      color: '#7a5c10', padding: '2px 8px', borderRadius: 'var(--r-pill)',
+                      border: '1px solid rgba(201,162,75,0.4)',
+                    }}>Not in standings</span>
+                  )}
                 </div>
                 <div className="small muted">
                   {fmtDate(round.play_date)} · {round.tee_time}
@@ -181,12 +197,24 @@ export default function MatchRoundsClient({
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s-3)', flexWrap: 'wrap' }}>
-                {hasScore && (
+                {hasScore && rs.inCompetition && (
                   <span>
                     <span style={{ color: 'var(--green)', fontWeight: 700 }}>{rMurray}</span>
                     <span className="muted"> – </span>
                     <span style={{ color: 'var(--rail-portrush)', fontWeight: 700 }}>{rHarris}</span>
                   </span>
+                )}
+                {/* Include in Comp toggle — admin only */}
+                {isAdmin && (
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 12, color: 'var(--mute)', userSelect: 'none' }}>
+                    <input
+                      type="checkbox"
+                      checked={rs.inCompetition}
+                      onChange={e => toggleCompetition(round.id, ri, e.target.checked)}
+                      style={{ width: 14, height: 14, cursor: 'pointer', accentColor: 'var(--green)' }}
+                    />
+                    In Comp
+                  </label>
                 )}
                 {/* Tee selector — admin */}
                 {isAdmin && tees.length > 0 && (

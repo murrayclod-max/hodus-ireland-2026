@@ -33,8 +33,9 @@ export default async function MatchPage() {
     supabase.from('aces').select('*, players(name), rounds(round_no, courses(name))') as unknown as Promise<{ data: any[] | null }>,
   ]);
 
-  const murrayTotal = (allMatches ?? []).filter(m => m.status === 'final').reduce((s, m) => s + Number(m.murray_points), 0);
-  const harrisTotal = (allMatches ?? []).filter(m => m.status === 'final').reduce((s, m) => s + Number(m.harris_points), 0);
+  const competitionRoundIds = new Set((rounds ?? []).filter(r => r.in_competition).map(r => r.id));
+  const murrayTotal = (allMatches ?? []).filter(m => m.status === 'final' && competitionRoundIds.has(m.round_id)).reduce((s, m) => s + Number(m.murray_points), 0);
+  const harrisTotal = (allMatches ?? []).filter(m => m.status === 'final' && competitionRoundIds.has(m.round_id)).reduce((s, m) => s + Number(m.harris_points), 0);
   const totalPts = murrayTotal + harrisTotal || 1;
 
   return (
