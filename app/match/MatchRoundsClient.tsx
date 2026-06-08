@@ -206,15 +206,21 @@ export default function MatchRoundsClient({
                 )}
                 {/* Include in Comp toggle — admin only */}
                 {isAdmin && (
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 12, color: 'var(--mute)', userSelect: 'none' }}>
-                    <input
-                      type="checkbox"
-                      checked={rs.inCompetition}
-                      onChange={e => toggleCompetition(round.id, ri, e.target.checked)}
-                      style={{ width: 14, height: 14, cursor: 'pointer', accentColor: 'var(--green)' }}
-                    />
-                    In Comp
-                  </label>
+                  <button
+                    onClick={() => toggleCompetition(round.id, ri, !rs.inCompetition)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 6,
+                      padding: '5px 11px', borderRadius: 'var(--r-pill)',
+                      fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.03em',
+                      cursor: 'pointer', border: 'none',
+                      background: rs.inCompetition ? 'rgba(14,59,46,0.12)' : 'rgba(201,162,75,0.15)',
+                      color: rs.inCompetition ? 'var(--green)' : '#7a5c10',
+                      outline: `1.5px solid ${rs.inCompetition ? 'rgba(14,59,46,0.25)' : 'rgba(201,162,75,0.4)'}`,
+                    }}
+                  >
+                    <span style={{ fontSize: 14, lineHeight: 1 }}>{rs.inCompetition ? '✓' : '○'}</span>
+                    {rs.inCompetition ? 'In Standings' : 'Add to Standings'}
+                  </button>
                 )}
                 {/* Tee selector — admin */}
                 {isAdmin && tees.length > 0 && (
