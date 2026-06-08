@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import type { Player } from '@/lib/types';
 import ProfileEditor from './ProfileEditor';
 import ChangePasswordForm from './ChangePasswordForm';
@@ -23,6 +24,12 @@ export default async function SettingsPage() {
         </div>
       </div>
       <div className="wrap stack-lg" style={{ paddingTop: 'var(--s-5)', paddingBottom: 'var(--s-6)' }}>
+        {player?.is_admin && (
+          <Link href="/admin" className="btn btn-block btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            ⚙️ Player Management (Admin)
+          </Link>
+        )}
+
         {player ? (
           <ProfileEditor player={player} userId={user.id} />
         ) : (
