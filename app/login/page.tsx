@@ -2,8 +2,11 @@
 
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { LogIn, Flag, Mail, ArrowLeft } from 'lucide-react';
+import { LogIn, Flag, Mail, ArrowLeft, Eye } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+
+const VIEWER_EMAIL = 'viewer@hodus.app';
+const VIEWER_USERNAME = 'hodus2026';
 
 function safeNext(raw: string | null): string {
   if (!raw) return '/';
@@ -115,60 +118,131 @@ function LoginForm() {
     );
   }
 
+  const [guestUser, setGuestUser] = useState('');
+  const [guestPass, setGuestPass] = useState('');
+
+  async function guestSignIn(e: React.FormEvent) {
+    e.preventDefault();
+    if (guestUser.trim().toLowerCase() !== VIEWER_USERNAME) {
+      setError('Invalid guest username.');
+      setStatus('error');
+      return;
+    }
+    setStatus('sending');
+    setError(null);
+    const supabase = createClient();
+    const { error: err } = await supabase.auth.signInWithPassword({
+      email: VIEWER_EMAIL,
+      password: guestPass,
+    });
+    if (err) {
+      setStatus('error');
+      setError('Invalid guest credentials.');
+      return;
+    }
+    router.replace(next);
+    router.refresh();
+  }
+
   return (
-    <form onSubmit={signIn} className="stack" style={{ marginTop: 'var(--s-6)' }}>
-      <label className="field">
-        Your email
-        <input
-          className="input"
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="username"
-          inputMode="email"
-          placeholder="you@example.com"
-        />
-      </label>
-      <label className="field">
-        Password
-        <input
-          className="input"
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="current-password"
-          placeholder="Trip password"
-        />
-      </label>
-      <div style={{ textAlign: 'right', marginTop: -4 }}>
+    <div className="stack" style={{ marginTop: 'var(--s-6)' }}>
+      <form onSubmit={signIn} className="stack">
+        <label className="field">
+          Your email
+          <input
+            className="input"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="username"
+            inputMode="email"
+            placeholder="you@example.com"
+          />
+        </label>
+        <label className="field">
+          Password
+          <input
+            className="input"
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            placeholder="Trip password"
+          />
+        </label>
+        <div style={{ textAlign: 'right', marginTop: -4 }}>
+          <button
+            type="button"
+            onClick={() => { setMode('forgot'); setStatus('idle'); setError(null); }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--mute)', fontSize: '0.82rem', padding: 0 }}
+          >
+            Forgot password?
+          </button>
+        </div>
         <button
-          type="button"
-          onClick={() => { setMode('forgot'); setStatus('idle'); setError(null); }}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--mute)', fontSize: '0.82rem', padding: 0 }}
+          type="submit"
+          disabled={status === 'sending'}
+          className="btn btn-primary btn-block btn-lg"
+          style={{ marginTop: 'var(--s-2)' }}
         >
-          Forgot password?
+          <LogIn size={18} aria-hidden />
+          {status === 'sending' ? 'Signing in…' : 'Sign in'}
         </button>
-      </div>
-      <button
-        type="submit"
-        disabled={status === 'sending'}
-        className="btn btn-primary btn-block btn-lg"
-        style={{ marginTop: 'var(--s-2)' }}
-      >
-        <LogIn size={18} aria-hidden />
-        {status === 'sending' ? 'Signing in…' : 'Sign in'}
-      </button>
+      </form>
+
       {error && (
         <p style={{ color: '#c0392b', fontSize: '0.85rem', background: '#fde8e6', padding: '10px 12px', borderRadius: 'var(--r-md)' }} role="alert">
           {error}
         </p>
       )}
-      <p className="center muted small" style={{ marginTop: 'var(--s-2)' }}>
-        Private trip app for the 12 lads. Contact Dan if you need access.
+
+      {/* Guest / viewer login */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: 'var(--s-1) 0' }}>
+        <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border)' }} />
+        <span style={{ fontSize: '0.75rem', color: 'var(--mute)', whiteSpace: 'nowrap' }}>or guest access</span>
+        <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border)' }} />
+      </div>
+
+      <form onSubmit={guestSignIn} className="stack-sm">
+        <label className="field">
+          Guest username
+          <input
+            className="input"
+            type="text"
+            required
+            value={guestUser}
+            onChange={e => setGuestUser(e.target.value)}
+            placeholder="Hodus2026"
+            autoCapitalize="none"
+          />
+        </label>
+        <label className="field">
+          Password
+          <input
+            className="input"
+            type="password"
+            required
+            value={guestPass}
+            onChange={e => setGuestPass(e.target.value)}
+            placeholder="Guest password"
+          />
+        </label>
+        <button
+          type="submit"
+          disabled={status === 'sending'}
+          className="btn btn-secondary btn-block"
+        >
+          <Eye size={16} aria-hidden />
+          View Trip (read-only)
+        </button>
+      </form>
+
+      <p className="center muted small">
+        Players: sign in with your email. Guests: use Hodus2026.
       </p>
-    </form>
+    </div>
   );
 }
 
