@@ -115,8 +115,8 @@ export default function FeedClient({ messages, photos, rounds, myPlayerId, myNam
 
   return (
     <div style={{ paddingBottom: 'var(--s-6)' }}>
-      {/* Compose area */}
-      <div style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border-soft)', padding: 'var(--s-3) var(--s-4)' }}>
+      {/* Compose area — hidden for viewer accounts (no player row) */}
+      {myPlayerId && <div style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border-soft)', padding: 'var(--s-3) var(--s-4)' }}>
         <div className="wrap">
           <div style={{ display: 'flex', gap: 'var(--s-2)', alignItems: 'flex-end' }}>
             <textarea
@@ -163,7 +163,7 @@ export default function FeedClient({ messages, photos, rounds, myPlayerId, myNam
             </div>
           )}
         </div>
-      </div>
+      </div>}
 
       {/* Feed */}
       <div className="wrap" style={{ paddingTop: 'var(--s-4)' }}>

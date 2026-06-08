@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { formatDate, kindIcon } from '@/lib/utils';
@@ -25,8 +25,9 @@ export default async function TripPage() {
   const { data: player } = await supabase
     .from('players').select('is_admin').eq('auth_user_id', user.id).maybeSingle() as { data: Pick<Player, 'is_admin'> | null };
   const isAdmin = !!player?.is_admin;
+  const db = player ? supabase : createServiceClient();
 
-  const { data: items } = await supabase
+  const { data: items } = await db
     .from('itinerary_items')
     .select('*')
     .order('day_date')

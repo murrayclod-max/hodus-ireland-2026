@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect, notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -19,20 +19,21 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
   const { data: me } = await supabase
     .from('players').select('is_admin').eq('auth_user_id', user.id).maybeSingle();
   const isAdmin = !!me?.is_admin;
+  const db = me ? supabase : createServiceClient();
 
-  const { data: player } = await supabase
+  const { data: player } = await db
     .from('players').select('*').eq('id', id).maybeSingle() as { data: Player | null };
   if (!player) notFound();
 
   // Index history for chart
-  const { data: indexHistory } = await supabase
+  const { data: indexHistory } = await db
     .from('player_indexes')
     .select('revision_date, index_value')
     .eq('player_id', id)
     .order('revision_date', { ascending: true });
 
   // Recent GHIN rounds
-  const { data: recentRounds } = await supabase
+  const { data: recentRounds } = await db
     .from('ghin_recent_rounds')
     .select('date_played, course_name, course_rating, slope_rating, gross_score, adjusted_gross_score, differential')
     .eq('player_id', id)
@@ -40,14 +41,14 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
     .limit(20);
 
   // Pairings across all rounds
-  const { data: pairings } = await supabase
+  const { data: pairings } = await db
     .from('pairings')
     .select('*, rounds(round_no, play_date, tee_time, is_altshot, courses(name, rail_color, slug)), player_a_data:players!player_a(id,name,first_name), player_b_data:players!player_b(id,name,first_name)')
     .or(`player_a.eq.${id},player_b.eq.${id}`)
     .order('rounds(play_date)');
 
   // Match record
-  const { data: matches } = await supabase
+  const { data: matches } = await db
     .from('matches')
     .select('murray_points, harris_points, murray_pairing:pairings!murray_pairing_id(player_a,player_b), harris_pairing:pairings!harris_pairing_id(player_a,player_b)')
     .eq('status', 'final') as { data: any[] | null };

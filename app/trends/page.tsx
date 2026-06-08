@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import TrendsClient from './TrendsClient';
 
@@ -9,13 +9,17 @@ export default async function TrendsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: players } = await supabase
+  const { data: me } = await supabase
+    .from('players').select('id').eq('auth_user_id', user.id).maybeSingle();
+  const db = me ? supabase : createServiceClient();
+
+  const { data: players } = await db
     .from('players')
     .select('id, name, first_name, team, handicap_index')
     .order('team')
     .order('name');
 
-  const { data: history } = await supabase
+  const { data: history } = await db
     .from('player_indexes')
     .select('player_id, revision_date, index_value')
     .order('revision_date', { ascending: true });

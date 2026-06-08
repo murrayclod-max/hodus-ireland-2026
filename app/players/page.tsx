@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -12,7 +12,11 @@ export default async function PlayersPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: players } = await supabase
+  const { data: me } = await supabase
+    .from('players').select('id').eq('auth_user_id', user.id).maybeSingle();
+  const db = me ? supabase : createServiceClient();
+
+  const { data: players } = await db
     .from('players').select('*').order('team').order('handicap_index') as { data: Player[] | null };
 
   const murray = (players ?? []).filter(p => p.team === 'murray');

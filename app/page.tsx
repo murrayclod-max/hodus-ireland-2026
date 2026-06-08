@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -16,8 +16,12 @@ export default async function HomePage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
+  const { data: me } = await supabase
+    .from('players').select('id').eq('auth_user_id', user.id).maybeSingle();
+  const db = me ? supabase : createServiceClient();
+
   const today = new Date().toISOString().split('T')[0];
-  const { data: rounds } = await supabase
+  const { data: rounds } = await db
     .from('rounds')
     .select('*, courses(*)')
     .gte('play_date', today)
@@ -25,7 +29,7 @@ export default async function HomePage() {
     .limit(1);
   const nextRound = rounds?.[0] as (Round & { courses: Course }) | undefined;
 
-  const { data: matches } = await supabase
+  const { data: matches } = await db
     .from('matches')
     .select('murray_points, harris_points')
     .eq('status', 'final') as { data: Pick<Match, 'murray_points' | 'harris_points'>[] | null };

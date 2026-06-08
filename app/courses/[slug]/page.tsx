@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect, notFound } from 'next/navigation';
 import type { Course, Round, SignatureHole } from '@/lib/types';
 import CourseEditPanel from './CourseEditPanel';
@@ -14,12 +14,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
   const { data: player } = await supabase
     .from('players').select('is_admin').eq('auth_user_id', user.id).maybeSingle();
   const isAdmin = !!player?.is_admin;
+  const db = player ? supabase : createServiceClient();
 
-  const { data: course } = await supabase
+  const { data: course } = await db
     .from('courses').select('*').eq('slug', slug).maybeSingle() as { data: Course | null };
   if (!course) notFound();
 
-  const { data: rounds } = await supabase
+  const { data: rounds } = await db
     .from('rounds').select('*').eq('course_id', course.id).order('round_no') as { data: Round[] | null };
 
   const sigHoles: SignatureHole[] = Array.isArray(course.signature_holes) ? course.signature_holes : [];

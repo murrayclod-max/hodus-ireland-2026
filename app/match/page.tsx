@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import type { Match, Round, Course, Pairing, Player, GameFormat } from '@/lib/types';
 import MatchRoundsClient from './MatchRoundsClient';
@@ -14,6 +14,7 @@ export default async function MatchPage() {
   const { data: me } = await supabase
     .from('players').select('id, is_admin').eq('auth_user_id', user.id).maybeSingle();
   const isAdmin = !!me?.is_admin;
+  const db = me ? supabase : createServiceClient();
 
   const [
     { data: rounds },
@@ -24,13 +25,13 @@ export default async function MatchPage() {
     { data: settings },
     { data: aces },
   ] = await Promise.all([
-    supabase.from('rounds').select('*, courses(*)').order('round_no') as unknown as Promise<{ data: (Round & { courses: Course })[] | null }>,
-    supabase.from('matches').select('*') as unknown as Promise<{ data: Match[] | null }>,
-    supabase.from('pairings').select('*, player_a_data:players!player_a(id,name,first_name,handicap_index,team), player_b_data:players!player_b(id,name,first_name,handicap_index,team)') as unknown as Promise<{ data: any[] | null }>,
-    supabase.from('players').select('id,name,first_name,handicap_index,team,is_captain,is_admin,auth_user_id,avatar_url,bio,home_club,nickname,phone,ghin,fun_facts').order('team').order('name') as unknown as Promise<{ data: Player[] | null }>,
-    supabase.from('game_formats').select('*').order('sort') as unknown as Promise<{ data: GameFormat[] | null }>,
-    supabase.from('trip_settings').select('*').eq('id', 1).maybeSingle(),
-    supabase.from('aces').select('*, players(name), rounds(round_no, courses(name))') as unknown as Promise<{ data: any[] | null }>,
+    db.from('rounds').select('*, courses(*)').order('round_no') as unknown as Promise<{ data: (Round & { courses: Course })[] | null }>,
+    db.from('matches').select('*') as unknown as Promise<{ data: Match[] | null }>,
+    db.from('pairings').select('*, player_a_data:players!player_a(id,name,first_name,handicap_index,team), player_b_data:players!player_b(id,name,first_name,handicap_index,team)') as unknown as Promise<{ data: any[] | null }>,
+    db.from('players').select('id,name,first_name,handicap_index,team,is_captain,is_admin,auth_user_id,avatar_url,bio,home_club,nickname,phone,ghin,fun_facts').order('team').order('name') as unknown as Promise<{ data: Player[] | null }>,
+    db.from('game_formats').select('*').order('sort') as unknown as Promise<{ data: GameFormat[] | null }>,
+    db.from('trip_settings').select('*').eq('id', 1).maybeSingle(),
+    db.from('aces').select('*, players(name), rounds(round_no, courses(name))') as unknown as Promise<{ data: any[] | null }>,
   ]);
 
   const competitionRoundIds = new Set((rounds ?? []).filter(r => r.in_competition).map(r => r.id));

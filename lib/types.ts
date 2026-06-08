@@ -86,6 +86,7 @@ export interface Round {
   format: RoundFormat;
   is_altshot: boolean;
   selected_tee: string | null;
+  in_competition: boolean;
   courses?: Course;
 }
 

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Course } from '@/lib/types';
@@ -10,7 +10,11 @@ export default async function CoursesPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: courses } = await supabase
+  const { data: player } = await supabase
+    .from('players').select('is_admin').eq('auth_user_id', user.id).maybeSingle();
+  const db = player ? supabase : createServiceClient();
+
+  const { data: courses } = await db
     .from('courses').select('*').order('sort') as { data: Course[] | null };
 
   const ROUND_LABELS: Record<string, string> = {

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import type { Message, Photo, Player, Round } from '@/lib/types';
 import FeedClient from './FeedClient';
@@ -13,19 +13,21 @@ export default async function FeedPage() {
   const { data: me } = await supabase
     .from('players').select('id, name, is_admin').eq('auth_user_id', user.id).maybeSingle() as { data: Pick<Player, 'id' | 'name' | 'is_admin'> | null };
 
-  const { data: messages } = await supabase
+  const db = me ? supabase : createServiceClient();
+
+  const { data: messages } = await db
     .from('messages')
     .select('*, players(id, name, first_name, avatar_url)')
     .order('created_at', { ascending: false })
     .limit(100) as { data: (Message & { players: Player })[] | null };
 
-  const { data: photos } = await supabase
+  const { data: photos } = await db
     .from('photos')
     .select('*, players(id, name, first_name, avatar_url), rounds(round_no, courses(name))')
     .order('created_at', { ascending: false })
     .limit(50) as { data: (Photo & { players: Player; rounds: any })[] | null };
 
-  const { data: rounds } = await supabase
+  const { data: rounds } = await db
     .from('rounds').select('id, round_no, courses(name)').order('round_no') as { data: (Pick<Round, 'id' | 'round_no'> & { courses: any })[] | null };
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;

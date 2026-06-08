@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import type { Flight, Player } from '@/lib/types';
 import FlightsClient from './FlightsClient';
@@ -13,12 +13,14 @@ export default async function FlightsPage() {
   const { data: me } = await supabase
     .from('players').select('id, is_admin').eq('auth_user_id', user.id).maybeSingle() as { data: Pick<Player, 'id' | 'is_admin'> | null };
 
-  const { data: flights } = await supabase
+  const db = me ? supabase : createServiceClient();
+
+  const { data: flights } = await db
     .from('flights')
     .select('*, players(id, name, first_name, team)')
     .order('arrive_at', { nullsFirst: false }) as { data: (Flight & { players: Player })[] | null };
 
-  const { data: players } = await supabase
+  const { data: players } = await db
     .from('players').select('id, name, first_name, team').order('team').order('name') as { data: Pick<Player, 'id' | 'name' | 'first_name' | 'team'>[] | null };
 
   return (
