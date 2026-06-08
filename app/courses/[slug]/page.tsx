@@ -36,7 +36,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
         <div style={{ position: 'absolute', bottom: 'var(--s-4)', left: 'var(--s-4)', right: 'var(--s-4)', color: '#fff' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s-3)' }}>
             {course.crest_url && (
-              <Image src={course.crest_url} alt="" width={56} height={56} style={{ borderRadius: '50%', border: '2px solid rgba(255,255,255,.3)' }} />
+              <div style={{ width: 56, height: 56, borderRadius: '50%', border: '2px solid rgba(255,255,255,.35)', background: '#fff', overflow: 'hidden', flexShrink: 0 }}>
+                <Image src={course.crest_url} alt="" width={56} height={56} style={{ objectFit: 'contain', width: '100%', height: '100%' }} />
+              </div>
             )}
             <div>
               <h1 style={{ color: '#fff', fontSize: 'clamp(1.2rem,4vw,1.8rem)' }}>{course.name}</h1>
