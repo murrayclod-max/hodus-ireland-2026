@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import type { Course } from '@/lib/types';
 
 export const revalidate = 3600;
@@ -14,8 +13,8 @@ export default async function CoursesPage() {
   const { data: courses } = await supabase
     .from('courses').select('*').order('sort') as { data: Course[] | null };
 
-  // Map sort order → round labels (R1 = RCD, R2 = Portrush, R3 = Portstewart, R4-5+R6 = Rosapenna)
   const ROUND_LABELS: Record<string, string> = {
+    portmarnock: 'Preview',
     rcd: 'R1',
     portrush: 'R2',
     portstewart: 'R3',
@@ -39,12 +38,11 @@ export default async function CoursesPage() {
 
               {/* Banner photo */}
               <div style={{ position: 'relative', height: 170, background: course.rail_color, overflow: 'hidden' }}>
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={`/banners/${course.slug}.png`}
-                  alt={course.name}
-                  fill
-                  style={{ objectFit: 'cover', opacity: 0.85 }}
-                  sizes="(max-width: 640px) 100vw, 640px"
+                  alt=""
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }}
                 />
                 {/* Dark gradient for text legibility */}
                 <div style={{
@@ -86,8 +84,10 @@ export default async function CoursesPage() {
                     overflow: 'hidden',
                     boxShadow: '0 2px 8px rgba(0,0,0,.2)',
                     zIndex: 2,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <Image src={course.crest_url} alt="" fill style={{ objectFit: 'contain' }} />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={course.crest_url} alt="" style={{ width: '88%', height: '88%', objectFit: 'contain' }} />
                   </div>
                 )}
               </div>
