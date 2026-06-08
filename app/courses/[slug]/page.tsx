@@ -114,7 +114,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
               {(rounds ?? []).map(r => (
                 <div key={r.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <span className="chip chip-neutral" style={{ marginRight: 6 }}>Round {r.round_no}</span>
+                    <span className="chip chip-neutral" style={{ marginRight: 6 }}>{r.in_competition ? `Round ${r.round_no}` : 'Appetizer'}</span>
                     <span style={{ fontWeight: 500 }}>{new Date(r.play_date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s-2)' }}>

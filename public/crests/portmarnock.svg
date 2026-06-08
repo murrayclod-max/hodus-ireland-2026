@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 195" fill="black">
+
+  <!-- ═══ LEFT MAST (x=60) ═══ -->
+  <rect x="58" y="32" width="4" height="94"/>
+  <!-- Left flagpole short -->
+  <rect x="38" y="32" width="3" height="82"/>
+  <!-- Left flag -->
+  <polygon points="41,32 56,38 41,44"/>
+  <!-- Left sails (3 tiers) -->
+  <rect x="30" y="58"  width="48" height="18"/>
+  <rect x="32" y="79"  width="44" height="16"/>
+  <rect x="34" y="98"  width="40" height="15"/>
+  <!-- Left mast top flag -->
+  <rect x="58" y="24" width="3" height="10"/>
+  <polygon points="61,24 75,29 61,34"/>
+
+  <!-- ═══ CENTER MAST (x=100, tallest) ═══ -->
+  <rect x="98" y="8" width="4" height="118"/>
+  <!-- Center sails (4 tiers) -->
+  <rect x="69" y="28"  width="62" height="21"/>
+  <rect x="71" y="52"  width="58" height="19"/>
+  <rect x="73" y="74"  width="54" height="17"/>
+  <rect x="75" y="94"  width="50" height="16"/>
+  <!-- Center mast top flag -->
+  <rect x="98" y="0" width="3" height="10"/>
+  <polygon points="101,0 118,6 101,12"/>
+  <!-- Center right short flagpole -->
+  <rect x="158" y="38" width="3" height="68"/>
+  <polygon points="155,38 140,44 155,50"/>
+
+  <!-- ═══ RIGHT MAST (x=142) ═══ -->
+  <rect x="140" y="40" width="4" height="86"/>
+  <!-- Right sails (3 tiers) -->
+  <rect x="122" y="64"  width="44" height="18"/>
+  <rect x="124" y="85"  width="40" height="16"/>
+  <rect x="126" y="104" width="36" height="14"/>
+  <!-- Right mast top flag -->
+  <rect x="140" y="32" width="3" height="10"/>
+  <polygon points="143,32 157,38 143,44"/>
+
+  <!-- ═══ HULL ═══ -->
+  <!-- Deck rail -->
+  <rect x="18" y="120" width="164" height="9" rx="2"/>
+  <!-- Side bulges (raised quarters) -->
+  <path d="M18,120 L8,112 Q10,104 20,104 L28,104 L28,120Z"/>
+  <path d="M182,120 L192,112 Q190,104 180,104 L172,104 L172,120Z"/>
+  <!-- Hull body with stripe cutouts -->
+  <path d="M22,129 L178,129 L170,158 Q100,172 30,158 Z"/>
+  <!-- White stripes through hull -->
+  <rect x="30"  y="136" width="140" height="4"  fill="white" rx="1"/>
+  <rect x="34"  y="145" width="132" height="4"  fill="white" rx="1"/>
+  <rect x="40"  y="154" width="120" height="4"  fill="white" rx="1"/>
+
+</svg>
