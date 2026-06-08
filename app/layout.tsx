@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import { Fraunces, Inter } from 'next/font/google';
-import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import TabBar from '@/components/TabBar';
 import './globals.css';
@@ -46,16 +44,6 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
-  if (user) {
-    const headersList = await headers();
-    const pathname = headersList.get('x-pathname') ?? '';
-    const isPublic = pathname.startsWith('/reset-password') || pathname.startsWith('/login') || pathname.startsWith('/api/') || pathname.startsWith('/auth/');
-    if (!isPublic) {
-      const { data: player } = await supabase.from('players').select('must_reset_password').eq('auth_user_id', user.id).maybeSingle();
-      if (player?.must_reset_password) redirect('/reset-password');
-    }
-  }
 
   return (
     <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>

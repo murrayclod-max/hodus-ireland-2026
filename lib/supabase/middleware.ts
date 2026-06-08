@@ -53,5 +53,20 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(homeUrl);
   }
 
+  // Force password reset on first login
+  if (!pathname.startsWith('/reset-password') && !pathname.startsWith('/auth/') && !pathname.startsWith('/api/')) {
+    const { data: player } = await supabase
+      .from('players')
+      .select('must_reset_password')
+      .eq('auth_user_id', user.id)
+      .maybeSingle();
+    if (player?.must_reset_password) {
+      const resetUrl = request.nextUrl.clone();
+      resetUrl.pathname = '/reset-password';
+      resetUrl.search = '';
+      return NextResponse.redirect(resetUrl);
+    }
+  }
+
   return response;
 }
