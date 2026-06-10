@@ -307,12 +307,23 @@ export default function MatchRoundsClient({
                   <div key={ms.matchId} style={{
                     border: '1px solid var(--border-soft)',
                     borderRadius: 'var(--r-md)',
-                    padding: 'var(--s-3)',
-                    position: 'relative',
+                    overflow: 'hidden',
                   }}>
-                    {course?.slug && (
-                      <Link href={`/courses/${course.slug}#weather`} style={{ position: 'absolute', top: 8, right: 10, textDecoration: 'none', fontSize: '0.9rem', lineHeight: 1, opacity: 0.75 }} title="Weather forecast">⛅</Link>
-                    )}
+                    {/* Match mini-header */}
+                    <div style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      padding: '5px 10px 5px 12px',
+                      background: 'var(--cream-dark)',
+                      borderBottom: '1px solid var(--border-soft)',
+                    }}>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--mute)' }}>
+                        Match {mi + 1}
+                      </span>
+                      {course?.slug && (
+                        <Link href={`/courses/${course.slug}#weather`} style={{ textDecoration: 'none', fontSize: '1rem', lineHeight: 1, display: 'flex', alignItems: 'center', padding: '3px 4px' }} title="Weather forecast">⛅</Link>
+                      )}
+                    </div>
+                    <div style={{ padding: 'var(--s-3)' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 'var(--s-2)', alignItems: 'center' }}>
 
                       {/* Murray pair */}
@@ -376,6 +387,7 @@ export default function MatchRoundsClient({
                         )}
                       </div>
                     )}
+                    </div>{/* end padding wrapper */}
                   </div>
                 );
               })}

@@ -79,7 +79,11 @@ export default async function TripPage() {
                 <span>{formatDate(date)}</span>
                 <Link
                   href={slugByDate.has(date) ? `/courses/${slugByDate.get(date)}#weather` : '/weather'}
-                  style={{ textDecoration: 'none', fontSize: '1rem', opacity: 0.85, lineHeight: 1 }}
+                  style={{
+                    textDecoration: 'none', fontSize: '1rem', lineHeight: 1,
+                    background: 'rgba(255,255,255,0.2)', borderRadius: 'var(--r-pill)',
+                    padding: '4px 8px', display: 'inline-flex', alignItems: 'center',
+                  }}
                   title="Weather forecast"
                 >⛅</Link>
               </div>
