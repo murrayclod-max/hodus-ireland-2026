@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { loginGhin, fetchIndexByGhin, fetchRecentGhinRounds } from '@/lib/ghin';
-import { createServiceClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -15,8 +15,16 @@ export const maxDuration = 300;
 export async function POST(req: NextRequest) {
   const auth = req.headers.get('authorization');
   const secret = process.env.CRON_SECRET;
-  if (secret && auth !== `Bearer ${secret}`) {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  const hasCronAuth = secret && auth === `Bearer ${secret}`;
+
+  if (!hasCronAuth) {
+    // Allow authenticated admin users to trigger from the UI
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    const { data: me } = await supabase
+      .from('players').select('is_admin').eq('auth_user_id', user.id).maybeSingle();
+    if (!me?.is_admin) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
   const startedAt = new Date().toISOString();
