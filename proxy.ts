@@ -6,5 +6,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|icons|manifest.json|crests|medallions|banners|map|og|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  // api/cron/ routes use CRON_SECRET bearer auth — never run session middleware on them
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icons|manifest.json|crests|medallions|banners|map|og|api/cron/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 };

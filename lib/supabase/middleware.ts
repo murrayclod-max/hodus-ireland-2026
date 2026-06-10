@@ -6,7 +6,8 @@ function isPublicPath(pathname: string): boolean {
     pathname === '/login' ||
     pathname.startsWith('/auth/') ||
     pathname.startsWith('/api/auth/') ||
-    pathname.startsWith('/api/ghin/')   // authenticated via CRON_SECRET bearer token
+    pathname.startsWith('/api/ghin/') ||  // authenticated via CRON_SECRET bearer token
+    pathname.startsWith('/api/cron/')      // cron routes authenticate via CRON_SECRET, never session
   );
 }
 
