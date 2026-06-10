@@ -57,17 +57,20 @@ export default async function WeatherPage() {
     .order('play_date');
 
   // Build date → round info map
-  type RoundRow = { play_date: string; round_no: number; in_competition: boolean; tee_time: string; courses: { slug: string; name: string } | null };
+  type RoundRow = { play_date: string; round_no: number; in_competition: boolean; tee_time: string; courses: { slug: string; name: string } | { slug: string; name: string }[] | null };
   const roundByDate = new Map<string, RoundRow>();
-  for (const r of (rounds ?? []) as RoundRow[]) {
+  for (const r of (rounds ?? []) as unknown as RoundRow[]) {
     if (!roundByDate.has(r.play_date)) roundByDate.set(r.play_date, r);
   }
 
   const days = TRIP_DAYS.map(date => {
     const round = roundByDate.get(date);
-    const slug = round?.courses?.slug ?? FALLBACK_SLUGS[date] ?? 'rcd';
+    const courseObj = round?.courses
+      ? (Array.isArray(round.courses) ? round.courses[0] : round.courses)
+      : null;
+    const slug = courseObj?.slug ?? FALLBACK_SLUGS[date] ?? 'rcd';
     const roundLabel = round
-      ? `${round.in_competition ? `Round ${round.round_no}` : 'Appetizer'} — ${round.courses?.name ?? ''} · ${round.tee_time}`
+      ? `${round.in_competition ? `Round ${round.round_no}` : 'Appetizer'} — ${courseObj?.name ?? ''} · ${round.tee_time}`
       : undefined;
     return {
       date,
