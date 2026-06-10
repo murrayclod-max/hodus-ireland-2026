@@ -43,11 +43,18 @@ export const LASS_QUEUE: DaySpec[] = [
 ];
 
 export const PROMPT_TEMPLATE = (profession: string, county: string): string =>
-  `Photorealistic vertical 9:16 iPhone wallpaper. An attractive adult Irish woman in ` +
-  `her late 20s wearing a playful Amazon Halloween-style costume of a ${profession}. ` +
-  `Set in County ${county}, Ireland during an extreme 95°F summer heat wave. ` +
-  `Bright midday sun blazing, heat haze visible in the distance, she is holding a ` +
-  `cold icy drink with condensation. PG-13, tasteful, fun, summery. No text, no logos, ` +
-  `no watermarks. Shot on 85mm lens, shallow depth of field, subject perfectly ` +
-  `centred in frame with headroom at the top for a clock overlay. Vibrant colours, ` +
-  `cinematic lighting, magazine quality.`;
+  `Vertical 9:16 pinup calendar photo, Pirelli calendar meets Sports Illustrated Swimsuit. ` +
+  `An exceptionally beautiful glamorous Irish woman in her mid-20s, model-level stunning — ` +
+  `perfect features, radiant freckled skin, bright confident smile. ` +
+  `Scorching 95°F Irish summer heat wave in County ${county}. ` +
+  `She is wearing tiny denim cut-off shorts and a knotted crop top tied above the midriff, ` +
+  `both damp from the heat. Barefoot. Her outfit or a single prop subtly nods to her ` +
+  `profession as a ${profession} — one clever visual reference, nothing costume-like. ` +
+  `Iconic County ${county} landscape behind her — coastline, cliffs, rolling green hills, ` +
+  `or a relevant local landmark. She is pressing a cold sweating glass bottle against her ` +
+  `cheek or neck, eyes playfully half-closed from the heat. ` +
+  `Skin glistening. Legs, midriff, and arms on full show. Classic pinup pose — ` +
+  `one hip out, effortlessly glamorous, playful and confident. ` +
+  `85mm lens, f/1.8 shallow depth of field, warm golden afternoon sun backlighting her hair. ` +
+  `PG — no nudity. Vogue / Pirelli calendar quality. Photorealistic. ` +
+  `No text, no logos, no watermarks. Headroom at top for clock overlay.`;
