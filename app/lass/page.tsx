@@ -38,11 +38,23 @@ export default async function LassPage() {
   const isAdmin = !!player?.is_admin;
   const db = player ? supabase : await createServiceClient();
 
-  const { data: rows } = await db
+  // Try with name column; fall back if migration hasn't run yet
+  let rows: LassRow[] | null = null;
+  const { data: rowsFull, error: rowsError } = await db
     .from('lass_of_the_day')
     .select('id, day_number, profession, county, image_url, created_at, name, fun_fact, famous_irish, lass_votes(vote, user_id)')
     .eq('status', 'published')
-    .order('day_number', { ascending: false }) as { data: LassRow[] | null };
+    .order('day_number', { ascending: false }) as { data: LassRow[] | null; error: unknown };
+  if (rowsError) {
+    const { data: rowsFallback } = await db
+      .from('lass_of_the_day')
+      .select('id, day_number, profession, county, image_url, created_at, fun_fact, famous_irish, lass_votes(vote, user_id)')
+      .eq('status', 'published')
+      .order('day_number', { ascending: false }) as { data: LassRow[] | null };
+    rows = (rowsFallback ?? []).map(r => ({ ...r, name: null }));
+  } else {
+    rows = rowsFull;
+  }
 
   const { data: roundRows } = await db
     .from('ghin_recent_rounds')
