@@ -5,6 +5,44 @@ import LassVoting from './LassVoting';
 
 const TRIP_DATE = new Date('2026-09-13T00:00:00Z');
 
+const PRONUNCIATIONS: Record<string, string> = {
+  'Aoife':        'EE-fa',
+  'Sinéad':       'shih-NAYD',
+  'Saoirse':      'SEER-sha',
+  'Clodagh':      'KLOH-da',
+  'Niamh':        'NEEV',
+  'Muireann':     'MWIR-an',
+  'Caoimhe':      'KWEE-va',
+  'Eimear':       'EE-mer',
+  'Brigid':       'BRIH-jid',
+  'Étaín':        'AY-tin',
+  'Gráinne':      'GRAWN-ya',
+  'Maeve':        'MAYV',
+  'Sorcha':       'SUR-a-kha',
+  'Roisín':       'roh-SHEEN',
+  'Orlaith':      'OR-la',
+  'Fionnuala':    'fih-NOO-la',
+  'Aisling':      'ASH-ling',
+  'Sadhbh':       'SIVE',
+  'Ciara':        'KEER-a',
+  'Deirdre':      'DEER-dra',
+  'Siobhán':      'shih-VAWN',
+  'Treasa':       'TREH-sa',
+  'Áine':         'AWN-ya',
+  'Lasairfhíona': 'LAS-ar-EE-na',
+  'Nuala':        'NOO-la',
+  'Méabh':        'MAYV',
+  'Clíona':       'KLEE-na',
+  'Beibhinn':     'BEH-vin',
+  'Aoibheann':    'EE-van',
+  'Finola':       'fih-NOH-la',
+  'Éabha':        'AY-va',
+  'Caitlín':      'KAWT-leen',
+  'Máire':        'MAW-ra',
+  'Íde':          'EE-da',
+  'Eithne':       'ETH-neh',
+};
+
 function daysLeft(createdAt: string): number {
   const posted = new Date(createdAt);
   posted.setUTCHours(0, 0, 0, 0);
@@ -110,7 +148,7 @@ function LassSlide({
   total: number;
   activeIndex: number;
 }) {
-  const [popup, setPopup] = useState<'fact' | 'famous' | null>(null);
+  const [popup, setPopup] = useState<'fact' | 'famous' | 'pronunciation' | null>(null);
   const days = daysLeft(item.created_at);
 
   return (
@@ -187,30 +225,13 @@ function LassSlide({
         {index + 1} / {total}
       </div>
 
-      {/* Bottom gradient + name + caption + voting */}
+      {/* Bottom gradient + caption + voting + name */}
       <div style={{
         position: 'absolute',
         bottom: 0, left: 0, right: 0,
         background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.4) 55%, transparent 100%)',
-        padding: '80px 20px 24px',
+        padding: '80px 20px 20px',
       }}>
-        {/* Irish name — centered */}
-        {item.name && (
-          <div style={{ textAlign: 'center', marginBottom: 18 }}>
-            <span style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '2.8rem',
-              fontWeight: 800,
-              color: '#fff',
-              textShadow: '0 2px 20px rgba(0,0,0,0.8)',
-              letterSpacing: '0.03em',
-              lineHeight: 1,
-            }}>
-              {item.name}
-            </span>
-          </div>
-        )}
-
         {/* Caption */}
         <div style={{ color: '#fff', marginBottom: 14 }}>
           {/* Days left badge */}
@@ -297,6 +318,32 @@ function LassSlide({
             </button>
           )}
         </div>
+
+        {/* Irish name — centered below voting row, tappable for pronunciation */}
+        {item.name && (
+          <div style={{ textAlign: 'center', marginTop: 14 }}>
+            <button
+              onClick={() => setPopup(p => p === 'pronunciation' ? null : 'pronunciation')}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '1.0rem',
+                fontWeight: 700,
+                color: 'rgba(255,255,255,0.75)',
+                letterSpacing: '0.06em',
+                lineHeight: 1,
+              }}>
+                {item.name}
+              </span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Popups */}
@@ -311,6 +358,13 @@ function LassSlide({
         <InfoCard
           title={`Famous Irish ${item.profession}`}
           body={item.famous_irish}
+          onClose={() => setPopup(null)}
+        />
+      )}
+      {popup === 'pronunciation' && item.name && (
+        <InfoCard
+          title="how to say it"
+          body={`${item.name}\n\n/ ${PRONUNCIATIONS[item.name] ?? '?'} /`}
           onClose={() => setPopup(null)}
         />
       )}
