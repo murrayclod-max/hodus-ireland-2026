@@ -191,8 +191,11 @@ export default function MatchRoundsClient({
                     }}>Not in standings</span>
                   )}
                 </div>
-                <div className="small muted">
+                <div className="small muted" style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
                   {fmtDate(round.play_date)} · {round.tee_time}
+                  {course?.slug && (
+                    <Link href={`/courses/${course.slug}#weather`} style={{ textDecoration: 'none', fontSize: '0.9rem', lineHeight: 1 }} title="Weather forecast">⛅</Link>
+                  )}
                   {round.is_altshot && <span className="chip chip-gilt" style={{ marginLeft: 6 }}>Alt Shot</span>}
                 </div>
               </div>

@@ -124,6 +124,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s-2)' }}>
                     <span style={{ fontWeight: 600 }}>{r.tee_time}</span>
+                    <a href="#weather" style={{ textDecoration: 'none', fontSize: '1rem', lineHeight: 1 }} title="Weather forecast">⛅</a>
                     {r.is_altshot && <span className="chip chip-gilt">Alt Shot</span>}
                   </div>
                 </div>

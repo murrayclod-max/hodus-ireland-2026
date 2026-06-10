@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Map, Flag, Trophy, Plane, MessageCircle, Users, TrendingUp, Settings } from 'lucide-react';
+import { Home, Map, Flag, Trophy, Plane, MessageCircle, Users, TrendingUp, Settings, Cloud } from 'lucide-react';
 
 const tabs = [
   { href: '/',         label: 'Home',    icon: Home },
   { href: '/trip',     label: 'Trip',    icon: Map },
   { href: '/courses',  label: 'Courses', icon: Flag },
   { href: '/match',    label: 'Match',   icon: Trophy },
+  { href: '/weather',  label: 'Weather', icon: Cloud },
   { href: '/flights',  label: 'Flights', icon: Plane },
   { href: '/feed',     label: 'Feed',    icon: MessageCircle },
   { href: '/players',  label: 'Players', icon: Users },

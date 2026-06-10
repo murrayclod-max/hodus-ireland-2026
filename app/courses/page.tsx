@@ -54,15 +54,17 @@ export default async function CoursesPage() {
                   background: `linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.55) 100%)`,
                 }} />
 
-                {/* Round badge — top left */}
-                <span style={{
-                  position: 'absolute', top: 12, left: 12,
-                  background: course.rail_color, color: '#fff',
-                  fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em',
-                  padding: '4px 9px', borderRadius: 'var(--r-pill)',
-                  border: '1.5px solid rgba(255,255,255,.3)',
-                }}>
-                  {ROUND_LABELS[course.slug] ?? ''}
+                {/* Round badge + weather icon — top left */}
+                <span style={{ position: 'absolute', top: 12, left: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{
+                    background: course.rail_color, color: '#fff',
+                    fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em',
+                    padding: '4px 9px', borderRadius: 'var(--r-pill)',
+                    border: '1.5px solid rgba(255,255,255,.3)',
+                  }}>
+                    {ROUND_LABELS[course.slug] ?? ''}
+                  </span>
+                  <span style={{ fontSize: '1rem', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.4))' }}>⛅</span>
                 </span>
 
                 {/* World rank badge — bottom right */}

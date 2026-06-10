@@ -131,16 +131,20 @@ export async function GET(req: NextRequest) {
   const slug = searchParams.get('slug') ?? '';
   const date = searchParams.get('date') ?? '';        // YYYY-MM-DD
   const teeTime = searchParams.get('teeTime') ?? '8:00';
+  const mode = searchParams.get('mode') ?? '';        // 'day' = 6-hourly all-day mode
 
   const coords = COORDS[slug];
   if (!coords || !date) {
     return NextResponse.json({ error: 'missing params' }, { status: 400 });
   }
 
-  const teeH = parseTeeHour(teeTime);
-  const teeM = parseTeeMinute(teeTime);
-  const startH = Math.max(0, teeH - 1);
-  const endH = Math.min(23, teeH + 6);
+  // Day mode: 6-hourly intervals (0, 6, 12, 18) for full-day view
+  const isDayMode = mode === 'day';
+  const teeH = isDayMode ? -1 : parseTeeHour(teeTime);
+  const teeM = isDayMode ? 0 : parseTeeMinute(teeTime);
+  const startH = isDayMode ? 0 : Math.max(0, teeH - 1);
+  const endH = isDayMode ? 23 : Math.min(23, teeH + 6);
+  const SIX_HOURLY = [0, 6, 12, 18];
 
   // Check if date is within Open-Meteo's 16-day forecast window
   const today = new Date();
@@ -185,9 +189,11 @@ export async function GET(req: NextRequest) {
       for (let i = 0; i < hourly.time.length; i++) {
         const h = parseInt(hourly.time[i].split('T')[1].split(':')[0]);
         if (h < startH || h > endH) continue;
+        if (isDayMode && !SIX_HOURLY.includes(h)) continue;
 
         const code = hourly.weathercode[i];
-        const dispH = h === teeH - 1 ? fmtHour(h, 0) :
+        const dispH = isDayMode ? fmtHour(h, 0) :
+                      h === teeH - 1 ? fmtHour(h, 0) :
                       h === teeH ? fmtHour(h, teeM) + ' ⛳' :
                       fmtHour(h, 0);
 
@@ -224,8 +230,10 @@ export async function GET(req: NextRequest) {
   const windowTemps: number[] = [];
 
   for (let h = startH; h <= endH; h++) {
+    if (isDayMode && !SIX_HOURLY.includes(h)) continue;
     const code = hist.wmoCode[h];
-    const dispH = h === teeH - 1 ? fmtHour(h, 0) :
+    const dispH = isDayMode ? fmtHour(h, 0) :
+                  h === teeH - 1 ? fmtHour(h, 0) :
                   h === teeH ? fmtHour(h, teeM) + ' ⛳' :
                   fmtHour(h, 0);
 

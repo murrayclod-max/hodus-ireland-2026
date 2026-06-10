@@ -67,9 +67,11 @@ export default async function TripPage() {
                 background: 'var(--green)', color: '#fff',
                 borderRadius: 'var(--r-md)', padding: '6px 12px',
                 fontFamily: 'var(--font-display)', fontWeight: 600,
-                marginBottom: 'var(--s-2)'
+                marginBottom: 'var(--s-2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               }}>
-                {formatDate(date)}
+                <span>{formatDate(date)}</span>
+                <span style={{ fontSize: '1rem', opacity: 0.85 }}>⛅</span>
               </div>
               <div className="stack-sm">
                 {dayItems.map(item => (
