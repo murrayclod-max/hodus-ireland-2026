@@ -1,7 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/server';
 import { LASS_QUEUE, PROMPT_TEMPLATE } from '@/lib/lass-queue';
 
-// Gemini image generation model — confirmed from local MCP server config
 const GEMINI_IMAGE_MODEL = 'gemini-3.1-flash-image-preview';
 
 interface GenerateResult {
@@ -9,6 +8,54 @@ interface GenerateResult {
   dayNumber?: number;
   imageUrl?: string;
   error?: string;
+}
+
+// Build a feedback string from historical vote data to steer the next generation.
+async function buildVoteContext(service: Awaited<ReturnType<typeof createServiceClient>>): Promise<string> {
+  const { data: lasses } = await service
+    .from('lass_of_the_day')
+    .select('day_number, profession, county, lass_votes(vote)')
+    .eq('status', 'published');
+
+  if (!lasses?.length) return '';
+
+  type Scored = { day: number; profession: string; county: string; score: number; count: number };
+
+  const scored: Scored[] = lasses
+    .map((l: { day_number: number; profession: string; county: string; lass_votes: { vote: number }[] }) => ({
+      day: l.day_number,
+      profession: l.profession,
+      county: l.county,
+      score: (l.lass_votes ?? []).reduce((s: number, v: { vote: number }) => s + v.vote, 0),
+      count: (l.lass_votes ?? []).length,
+    }))
+    .filter((l: Scored) => l.count >= 2); // ignore lasses without meaningful votes
+
+  if (!scored.length) return '';
+
+  scored.sort((a, b) => b.score - a.score);
+
+  const top    = scored.filter(l => l.score > 0).slice(0, 3);
+  const bottom = scored.filter(l => l.score < 0).slice(-3).reverse();
+
+  const parts: string[] = ['[VOTER FEEDBACK — use this to dial in the next image]:'];
+
+  if (top.length) {
+    parts.push(
+      `The lads LOVED these (highest votes — replicate these vibes): ` +
+      top.map(l => `Day ${l.day} ${l.profession} in ${l.county} (+${l.score})`).join(', ') + '.'
+    );
+  }
+  if (bottom.length) {
+    parts.push(
+      `The lads were NOT feeling these (lowest votes — avoid these patterns): ` +
+      bottom.map(l => `Day ${l.day} ${l.profession} in ${l.county} (${l.score})`).join(', ') + '.'
+    );
+  }
+
+  parts.push('Maximise what scored highest. Learn from what flopped.');
+
+  return '\n\n' + parts.join(' ');
 }
 
 export async function generateLassOfTheDay(
@@ -22,18 +69,17 @@ export async function generateLassOfTheDay(
     spec = LASS_QUEUE.find(s => s.day_number === overrideDayNumber);
     if (!spec) return { success: false, error: `No spec for day ${overrideDayNumber}` };
   } else {
-    // Find all day_numbers already in the table (any status)
-    const { data: used } = await service
-      .from('lass_of_the_day')
-      .select('day_number');
+    const { data: used } = await service.from('lass_of_the_day').select('day_number');
     const usedSet = new Set((used ?? []).map((r: { day_number: number }) => r.day_number));
     spec = LASS_QUEUE.find(s => !usedSet.has(s.day_number));
     if (!spec) return { success: false, error: 'All day specs have been used' };
   }
 
-  const prompt = PROMPT_TEMPLATE(spec.profession, spec.county);
+  // ── Build prompt with vote feedback appended ────────────────────────────────
+  const voteContext = await buildVoteContext(service);
+  const prompt = PROMPT_TEMPLATE(spec.profession, spec.county, spec.twist) + voteContext;
 
-  // ── Call Gemini image generation API ─────────────────────────────────────
+  // ── Call Gemini image generation API ───────────────────────────────────────
   let base64Image: string;
   let mimeType = 'image/png';
   try {
@@ -75,21 +121,20 @@ export async function generateLassOfTheDay(
       county: spec.county,
       prompt,
       status: 'failed',
+      fun_fact: spec.fun_fact,
+      famous_irish: spec.famous_irish,
     });
     return { success: false, error: msg };
   }
 
-  // ── Upload to Supabase Storage ─────────────────────────────────────────────
+  // ── Upload to Supabase Storage ──────────────────────────────────────────────
   const ext = mimeType.includes('jpeg') ? 'jpg' : 'png';
   const fileName = `day-${spec.day_number}.${ext}`;
   const imageBytes = Buffer.from(base64Image, 'base64');
 
   const { error: uploadError } = await service.storage
     .from('lass-of-the-day')
-    .upload(fileName, imageBytes, {
-      contentType: mimeType,
-      upsert: true,
-    });
+    .upload(fileName, imageBytes, { contentType: mimeType, upsert: true });
 
   if (uploadError) {
     await service.from('lass_of_the_day').insert({
@@ -106,9 +151,7 @@ export async function generateLassOfTheDay(
     .from('lass-of-the-day')
     .getPublicUrl(fileName);
 
-
-
-  // ── Insert DB row (upsert on day_number to support regenerate) ─────────────
+  // ── Upsert DB row ───────────────────────────────────────────────────────────
   const { error: dbError } = await service
     .from('lass_of_the_day')
     .upsert(
@@ -119,6 +162,8 @@ export async function generateLassOfTheDay(
         prompt,
         image_url: publicUrl,
         status: 'published',
+        fun_fact: spec.fun_fact,
+        famous_irish: spec.famous_irish,
         created_at: new Date().toISOString(),
       },
       { onConflict: 'day_number' }

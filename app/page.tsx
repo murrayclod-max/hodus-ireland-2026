@@ -46,16 +46,18 @@ export default async function HomePage() {
         paddingTop: 'env(safe-area-inset-top)',
         overflow: 'hidden',
       }}>
-        <Image
-          src="/hodus-cover.jpg"
-          alt="Hodus 5-0 — Northern Ireland &amp; Donegal 2026"
-          width={640}
-          height={853}
-          style={{ width: '100%', height: 'auto', display: 'block' }}
-          priority
-        />
-        <div className="wrap" style={{ paddingTop: 'var(--s-4)', paddingBottom: 'var(--s-5)' }}>
+        <div className="wrap" style={{ paddingTop: 'var(--s-4)' }}>
           <Countdown targetDate={TRIP_START} endDate={TRIP_END} />
+        </div>
+        <div style={{ maxWidth: 480, margin: '8px auto 0' }}>
+          <Image
+            src="/hodus-cover.jpg"
+            alt="Hodus 5-0 — Northern Ireland &amp; Donegal 2026"
+            width={640}
+            height={853}
+            style={{ width: '100%', height: 'auto', display: 'block' }}
+            priority
+          />
         </div>
       </div>
 

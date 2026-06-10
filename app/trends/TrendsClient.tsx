@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 
 type HistoryPoint = { date: string; value: number };
 
@@ -287,12 +287,46 @@ function TeamLegend({ players }: { players: PlayerData[] }) {
 
 // ── Main ───────────────────────────────────────────────────────────────────
 
-export default function TrendsClient({ players }: { players: PlayerData[] }) {
+type RecentRound = {
+  playerName: string;
+  datePlayed: string;
+  courseName: string;
+  grossScore: number;
+};
+
+function formatRoundDate(d: string): string {
+  const [, m, day] = d.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[Number(m) - 1]} ${Number(day)}`;
+}
+
+export default function TrendsClient({ players, recentRounds = [], isAdmin = false }: { players: PlayerData[]; recentRounds?: RecentRound[]; isAdmin?: boolean }) {
   const [view, setView] = useState<'teams' | 'players'>('teams');
   const [period, setPeriod] = useState<PeriodId>('2y');
   const [activePlayers, setActivePlayers] = useState<Set<string>>(
     () => new Set(players.map(p => p.id))
   );
+  const [ghinStatus, setGhinStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [ghinMsg, setGhinMsg] = useState('');
+
+  const refreshGhin = useCallback(async () => {
+    setGhinStatus('loading');
+    setGhinMsg('');
+    try {
+      const res = await fetch('/api/ghin/refresh', { method: 'POST' });
+      const json = await res.json();
+      if (res.ok) {
+        setGhinMsg(`Updated ${json.results?.length ?? 0} players — reload to see rounds`);
+        setGhinStatus('done');
+      } else {
+        setGhinMsg(json.error ?? 'Failed');
+        setGhinStatus('error');
+      }
+    } catch {
+      setGhinMsg('Network error');
+      setGhinStatus('error');
+    }
+  }, []);
 
   // Strip any bad values that slipped through before server-side guard existed
   const cleanPlayers = useMemo(() =>
@@ -405,6 +439,67 @@ export default function TrendsClient({ players }: { players: PlayerData[] }) {
           )}
         </div>
       </div>
+
+      {/* Recent Rounds */}
+      {(recentRounds.length > 0 || isAdmin) && (
+        <div className="board">
+          <div className="board-title" style={{ paddingTop: 20, paddingBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>Recent Rounds</span>
+            {isAdmin && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                <button
+                  onClick={refreshGhin}
+                  disabled={ghinStatus === 'loading'}
+                  className="btn btn-secondary btn-sm"
+                  style={{ fontSize: '0.75rem' }}
+                >
+                  {ghinStatus === 'loading' ? 'Refreshing…' : '↻ Refresh GHIN'}
+                </button>
+                {ghinMsg && (
+                  <span style={{ fontSize: '0.7rem', color: ghinStatus === 'error' ? '#c0392b' : 'var(--green)' }}>
+                    {ghinMsg}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+          <div style={{ padding: '0 var(--s-5) var(--s-5)' }}>
+            {recentRounds.length === 0 && (
+              <p className="muted small" style={{ paddingBottom: 8 }}>
+                No rounds yet — hit Refresh GHIN to load data.
+              </p>
+            )}
+            <div className="stack-xs">
+              {recentRounds.map((r, i) => (
+                <div key={i} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '8px 0',
+                  borderBottom: i < recentRounds.length - 1 ? '1px solid var(--border-soft)' : 'none',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem' }}>
+                      {r.playerName}
+                    </span>
+                    <span style={{ color: 'var(--mute)', fontSize: '0.85rem' }}>
+                      {r.courseName}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem' }}>
+                      {r.grossScore}
+                    </span>
+                    <span style={{ color: 'var(--mute)', fontSize: '0.75rem', minWidth: 44, textAlign: 'right' }}>
+                      {formatRoundDate(r.datePlayed)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
