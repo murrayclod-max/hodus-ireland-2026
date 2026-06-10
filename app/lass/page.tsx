@@ -39,7 +39,7 @@ export default async function LassPage() {
 
   const { data: rows } = await db
     .from('lass_of_the_day')
-    .select('id, day_number, profession, county, image_url, created_at, lass_votes(vote, user_id)')
+    .select('id, day_number, profession, county, image_url, created_at, fun_fact, famous_irish, lass_votes(vote, user_id)')
     .eq('status', 'published')
     .order('day_number', { ascending: false }) as { data: LassRow[] | null };
 
