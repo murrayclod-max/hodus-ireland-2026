@@ -42,17 +42,9 @@ export default async function TrendsPage() {
     playerIndexMap[p.id] = p.handicap_index as number | null;
   }
 
-  // Resolve Mitchell's player ID so exclusion is name-format-independent
-  const mitchellId = (players ?? []).find(
-    p => (p.name as string).toLowerCase().includes('mitchell')
-  )?.id;
-
-  // Last 4 rounds per player, exclude Mitchell
+  // Last 4 rounds per player
   const roundsPerPlayer: Record<string, typeof recentRoundsRaw> = {};
   for (const r of recentRoundsRaw ?? []) {
-    if (mitchellId && r.player_id === mitchellId) continue;
-    const lastName = playerNameMap[r.player_id] ?? '';
-    if (lastName === 'Mitchell') continue; // belt-and-suspenders
     if (!roundsPerPlayer[r.player_id]) roundsPerPlayer[r.player_id] = [];
     if (roundsPerPlayer[r.player_id]!.length < 4) {
       roundsPerPlayer[r.player_id]!.push(r);
