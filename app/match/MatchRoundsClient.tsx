@@ -308,7 +308,11 @@ export default function MatchRoundsClient({
                     border: '1px solid var(--border-soft)',
                     borderRadius: 'var(--r-md)',
                     padding: 'var(--s-3)',
+                    position: 'relative',
                   }}>
+                    {course?.slug && (
+                      <Link href={`/courses/${course.slug}#weather`} style={{ position: 'absolute', top: 8, right: 10, textDecoration: 'none', fontSize: '0.9rem', lineHeight: 1, opacity: 0.75 }} title="Weather forecast">⛅</Link>
+                    )}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 'var(--s-2)', alignItems: 'center' }}>
 
                       {/* Murray pair */}
