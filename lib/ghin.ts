@@ -114,11 +114,11 @@ export async function fetchHandicapHistory(
 export type GhinRecentRound = {
   date_played: string;       // 'YYYY-MM-DD'
   course_name: string;
-  course_rating: number;
-  slope_rating: number;
+  course_rating: number | null;
+  slope_rating: number | null;
   gross_score: number;
   adjusted_gross_score: number;
-  differential: number;
+  differential: number | null;
   raw: Record<string, unknown>;
 };
 
@@ -182,8 +182,8 @@ export async function fetchRecentGhinRounds(
     const ags          = parseNum(row.adjusted_gross_score);
     const diff         = parseNum(row.differential);
 
-    if (!datePlayed || !courseName || courseRating == null || slopeRating == null
-        || ags == null || diff == null) continue;
+    // Only hard-require date, course name, and a score — rating/differential can be null
+    if (!datePlayed || !courseName || ags == null) continue;
 
     // Accept any round with a valid differential (9-hole, combined, etc.)
     // Skipping only rounds without a number_of_holes field AND no differential
