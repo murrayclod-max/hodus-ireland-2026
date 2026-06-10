@@ -1,9 +1,8 @@
 import { createServiceClient } from '@/lib/supabase/server';
 import { LASS_QUEUE, PROMPT_TEMPLATE } from '@/lib/lass-queue';
 
-// ── Verify this model string at https://ai.google.dev/gemini-api/docs/imagen
-// Imagen 4 Fast — announced Google I/O 2025. Confirm exact ID in the docs.
-const IMAGEN_MODEL = 'imagen-4.0-fast-generate-001';
+// Gemini image generation model — confirmed from local MCP server config
+const GEMINI_IMAGE_MODEL = 'gemini-3.1-flash-image-preview';
 
 interface GenerateResult {
   success: boolean;
@@ -34,35 +33,40 @@ export async function generateLassOfTheDay(
 
   const prompt = PROMPT_TEMPLATE(spec.profession, spec.county);
 
-  // ── Call Google Imagen API ─────────────────────────────────────────────────
+  // ── Call Gemini image generation API ─────────────────────────────────────
   let base64Image: string;
+  let mimeType = 'image/png';
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error('GEMINI_API_KEY env var not set');
 
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${IMAGEN_MODEL}:predict?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_IMAGE_MODEL}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          instances: [{ prompt }],
-          parameters: { sampleCount: 1, aspectRatio: '9:16' },
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseModalities: ['IMAGE'] },
         }),
       }
     );
 
     if (!res.ok) {
       const body = await res.text();
-      throw new Error(`Imagen API ${res.status}: ${body}`);
+      throw new Error(`Gemini image API ${res.status}: ${body}`);
     }
 
     const json = await res.json() as {
-      predictions: Array<{ bytesBase64Encoded: string; mimeType: string }>;
+      candidates: Array<{
+        content: { parts: Array<{ inlineData?: { mimeType: string; data: string } }> };
+      }>;
     };
 
-    base64Image = json.predictions?.[0]?.bytesBase64Encoded;
-    if (!base64Image) throw new Error('No image bytes in Imagen response');
+    const part = json.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+    if (!part?.inlineData) throw new Error('No image data in Gemini response');
+    base64Image = part.inlineData.data;
+    mimeType = part.inlineData.mimeType ?? 'image/png';
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     await service.from('lass_of_the_day').insert({
@@ -76,13 +80,14 @@ export async function generateLassOfTheDay(
   }
 
   // ── Upload to Supabase Storage ─────────────────────────────────────────────
-  const fileName = `day-${spec.day_number}.png`;
+  const ext = mimeType.includes('jpeg') ? 'jpg' : 'png';
+  const fileName = `day-${spec.day_number}.${ext}`;
   const imageBytes = Buffer.from(base64Image, 'base64');
 
   const { error: uploadError } = await service.storage
     .from('lass-of-the-day')
     .upload(fileName, imageBytes, {
-      contentType: 'image/png',
+      contentType: mimeType,
       upsert: true,
     });
 
@@ -100,6 +105,8 @@ export async function generateLassOfTheDay(
   const { data: { publicUrl } } = service.storage
     .from('lass-of-the-day')
     .getPublicUrl(fileName);
+
+
 
   // ── Insert DB row (upsert on day_number to support regenerate) ─────────────
   const { error: dbError } = await service
