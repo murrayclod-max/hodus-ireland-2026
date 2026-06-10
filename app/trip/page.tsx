@@ -27,11 +27,17 @@ export default async function TripPage() {
   const isAdmin = !!player?.is_admin;
   const db = player ? supabase : createServiceClient();
 
-  const { data: items } = await db
-    .from('itinerary_items')
-    .select('*')
-    .order('day_date')
-    .order('sort');
+  const [{ data: items }, { data: rounds }] = await Promise.all([
+    db.from('itinerary_items').select('*').order('day_date').order('sort'),
+    db.from('rounds').select('play_date, courses(slug)').order('play_date'),
+  ]);
+
+  // Build date → course slug for weather links
+  const slugByDate = new Map<string, string>();
+  for (const r of (rounds ?? []) as unknown as { play_date: string; courses: { slug: string } | null }[]) {
+    const slug = Array.isArray(r.courses) ? r.courses[0]?.slug : r.courses?.slug;
+    if (slug && !slugByDate.has(r.play_date)) slugByDate.set(r.play_date, slug);
+  }
 
   const grouped = groupByDate((items as ItineraryItem[]) ?? []);
   const dates = Array.from(grouped.keys()).sort();
@@ -71,7 +77,11 @@ export default async function TripPage() {
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               }}>
                 <span>{formatDate(date)}</span>
-                <span style={{ fontSize: '1rem', opacity: 0.85 }}>⛅</span>
+                <Link
+                  href={slugByDate.has(date) ? `/courses/${slugByDate.get(date)}#weather` : '/weather'}
+                  style={{ textDecoration: 'none', fontSize: '1rem', opacity: 0.85, lineHeight: 1 }}
+                  title="Weather forecast"
+                >⛅</Link>
               </div>
               <div className="stack-sm">
                 {dayItems.map(item => (
