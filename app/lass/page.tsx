@@ -14,6 +14,7 @@ interface LassRow {
   county: string;
   image_url: string;
   created_at: string;
+  name: string | null;
   fun_fact: string | null;
   famous_irish: string | null;
   lass_votes: VoteRow[];
@@ -39,7 +40,7 @@ export default async function LassPage() {
 
   const { data: rows } = await db
     .from('lass_of_the_day')
-    .select('id, day_number, profession, county, image_url, created_at, fun_fact, famous_irish, lass_votes(vote, user_id)')
+    .select('id, day_number, profession, county, image_url, created_at, name, fun_fact, famous_irish, lass_votes(vote, user_id)')
     .eq('status', 'published')
     .order('day_number', { ascending: false }) as { data: LassRow[] | null };
 
@@ -70,6 +71,7 @@ export default async function LassPage() {
       downvotes:   (row.lass_votes ?? []).filter(v => v.vote === -1).length,
       userVote:    ((row.lass_votes ?? []).find(v => v.user_id === user.id)?.vote ?? null) as 1 | -1 | null,
       roundsThatDay: roundsByDate[lassDate] ?? [],
+      name:        row.name,
       fun_fact:    row.fun_fact,
       famous_irish: row.famous_irish,
     };

@@ -26,9 +26,8 @@ export default async function TrendsPage() {
 
   const { data: recentRoundsRaw } = await db
     .from('ghin_recent_rounds')
-    .select('player_id, date_played, course_name, gross_score')
-    .order('date_played', { ascending: false })
-    .limit(20);
+    .select('player_id, date_played, course_name, gross_score, differential')
+    .order('date_played', { ascending: false });
 
   const historyByPlayer: Record<string, Array<{ date: string; value: number }>> = {};
   for (const row of history ?? []) {
@@ -37,16 +36,40 @@ export default async function TrendsPage() {
   }
 
   const playerNameMap: Record<string, string> = {};
+  const playerIndexMap: Record<string, number | null> = {};
   for (const p of players ?? []) {
     playerNameMap[p.id] = (p.name as string).split(' ').pop() ?? (p.name as string);
+    playerIndexMap[p.id] = p.handicap_index as number | null;
   }
 
-  const recentRounds = (recentRoundsRaw ?? []).map(r => ({
-    playerName: playerNameMap[r.player_id] ?? 'Unknown',
-    datePlayed: r.date_played as string,
-    courseName: r.course_name as string,
-    grossScore: r.gross_score as number,
-  }));
+  // Last 3 rounds per player, exclude Mitchell
+  const roundsPerPlayer: Record<string, typeof recentRoundsRaw> = {};
+  for (const r of recentRoundsRaw ?? []) {
+    const lastName = playerNameMap[r.player_id] ?? '';
+    if (lastName === 'Mitchell') continue;
+    if (!roundsPerPlayer[r.player_id]) roundsPerPlayer[r.player_id] = [];
+    if (roundsPerPlayer[r.player_id]!.length < 3) {
+      roundsPerPlayer[r.player_id]!.push(r);
+    }
+  }
+
+  const recentRounds = Object.values(roundsPerPlayer)
+    .flat()
+    .sort((a, b) => (b?.date_played ?? '').localeCompare(a?.date_played ?? ''))
+    .map(r => {
+      const idx = playerIndexMap[r!.player_id];
+      const diff = r!.differential as number | null;
+      const indexDelta = idx != null && diff != null
+        ? Math.round((idx - diff) * 10) / 10
+        : null;
+      return {
+        playerName: playerNameMap[r!.player_id] ?? 'Unknown',
+        datePlayed: r!.date_played as string,
+        courseName: r!.course_name as string,
+        grossScore: r!.gross_score as number,
+        indexDelta,
+      };
+    });
 
   const playerData = (players ?? []).map((p, i) => ({
     id: p.id,

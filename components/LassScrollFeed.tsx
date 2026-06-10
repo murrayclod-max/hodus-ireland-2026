@@ -30,6 +30,7 @@ export interface LassFeedItem {
   downvotes: number;
   userVote: 1 | -1 | null;
   roundsThatDay?: string[];
+  name?: string | null;
   fun_fact?: string | null;
   famous_irish?: string | null;
 }
@@ -186,13 +187,30 @@ function LassSlide({
         {index + 1} / {total}
       </div>
 
-      {/* Bottom gradient + caption + voting */}
+      {/* Bottom gradient + name + caption + voting */}
       <div style={{
         position: 'absolute',
         bottom: 0, left: 0, right: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
-        padding: '60px 20px 24px',
+        background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.4) 55%, transparent 100%)',
+        padding: '80px 20px 24px',
       }}>
+        {/* Irish name — centered */}
+        {item.name && (
+          <div style={{ textAlign: 'center', marginBottom: 18 }}>
+            <span style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '2.8rem',
+              fontWeight: 800,
+              color: '#fff',
+              textShadow: '0 2px 20px rgba(0,0,0,0.8)',
+              letterSpacing: '0.03em',
+              lineHeight: 1,
+            }}>
+              {item.name}
+            </span>
+          </div>
+        )}
+
         {/* Caption */}
         <div style={{ color: '#fff', marginBottom: 14 }}>
           {/* Days left badge */}

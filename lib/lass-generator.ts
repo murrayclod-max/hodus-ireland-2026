@@ -123,6 +123,7 @@ export async function generateLassOfTheDay(
       status: 'failed',
       fun_fact: spec.fun_fact,
       famous_irish: spec.famous_irish,
+      name: spec.name,
     });
     return { success: false, error: msg };
   }
@@ -164,6 +165,7 @@ export async function generateLassOfTheDay(
         status: 'published',
         fun_fact: spec.fun_fact,
         famous_irish: spec.famous_irish,
+        name: spec.name,
         created_at: new Date().toISOString(),
       },
       { onConflict: 'day_number' }

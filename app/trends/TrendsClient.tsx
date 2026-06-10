@@ -292,6 +292,7 @@ type RecentRound = {
   datePlayed: string;
   courseName: string;
   grossScore: number;
+  indexDelta: number | null;
 };
 
 function formatRoundDate(d: string): string {
@@ -486,10 +487,22 @@ export default function TrendsClient({ players, recentRounds = [], isAdmin = fal
                       {r.courseName}
                     </span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                     <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem' }}>
                       {r.grossScore}
                     </span>
+                    {r.indexDelta != null && (
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        color: r.indexDelta >= 0 ? 'var(--green, #2d7a3a)' : '#c0392b',
+                        minWidth: 36,
+                        textAlign: 'right',
+                        fontVariantNumeric: 'tabular-nums',
+                      }}>
+                        {r.indexDelta >= 0 ? '+' : ''}{r.indexDelta.toFixed(1)}
+                      </span>
+                    )}
                     <span style={{ color: 'var(--mute)', fontSize: '0.75rem', minWidth: 44, textAlign: 'right' }}>
                       {formatRoundDate(r.datePlayed)}
                     </span>
