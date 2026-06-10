@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     const token = await loginGhin();
     const today = new Date().toISOString().split('T')[0];
 
-    const results: Array<{ name: string; ghin: string; index: number | null; rounds: number }> = [];
+    const results: Array<{ name: string; ghin: string; index: number | null; rounds: number; rawKeys?: string[] }> = [];
     const errors: string[] = [];
 
     for (const player of players) {
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
         await supabase.from('ghin_recent_rounds').delete().in('id', toDelete);
       }
 
-      results.push({ name: player.name, ghin: player.ghin!, index: idx, rounds: recentRounds.length });
+      results.push({ name: player.name, ghin: player.ghin!, index: idx, rounds: recentRounds.length, rawKeys: recentRounds[0] ? Object.keys(recentRounds[0] as object) : [] });
     }
 
     return NextResponse.json({ ok: true, startedAt, finishedAt: new Date().toISOString(), results, errors });

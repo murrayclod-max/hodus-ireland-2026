@@ -156,31 +156,41 @@ export async function fetchRecentGhinRounds(
   //   ...
   // }
   type ScoreRow = Record<string, unknown>;
+  // GHIN API shape varies by association — handle all known variants:
+  //   { revision_scores: { scores: [] }, recent_scores: { scores: [] } }  (most clubs)
+  //   { scores: [] }  (some associations, e.g. NCGA)
   const revScores  = ((data.revision_scores as { scores?: ScoreRow[] } | undefined)?.scores ?? []);
   const recScores  = ((data.recent_scores  as { scores?: ScoreRow[] } | undefined)?.scores ?? []);
-  // Merge, sort newest-first by played_at, take the most recent `count`
-  const allRows = [...recScores, ...revScores];
-  allRows.sort((a, b) =>
-    String(b.played_at ?? '').localeCompare(String(a.played_at ?? ''))
-  );
+  const topScores  = Array.isArray(data.scores) ? (data.scores as ScoreRow[]) : [];
+  // Merge, deduplicate by identity, sort newest-first, take `count`
+  const seen = new Set<ScoreRow>();
+  const allRows: ScoreRow[] = [];
+  for (const r of [...recScores, ...revScores, ...topScores]) {
+    if (!seen.has(r)) { seen.add(r); allRows.push(r); }
+  }
+  const dateKey = (r: ScoreRow): string =>
+    String(r.played_at ?? r.score_date ?? r.played_date ?? r.date_played ?? '');
+  allRows.sort((a, b) => dateKey(b).localeCompare(dateKey(a)));
   const rows = allRows.slice(0, count);
 
   const parseNum = (v: unknown): number | null => {
     if (v == null) return null;
-    const n = Number(v);
+    // Strip trailing letters (e.g. "86H" → 86)
+    const n = typeof v === 'string' ? Number(v.replace(/[^0-9.\-]/g, '')) : Number(v);
     return Number.isFinite(n) ? n : null;
   };
 
   const results: GhinRecentRound[] = [];
   for (const row of rows) {
-    // All field names are snake_case in this API (confirmed from live response)
-    const datePlayed = typeof row.played_at === 'string' ? row.played_at.slice(0, 10) : '';
-    const courseName = String(row.course_name ?? row.facility_name ?? '');
-    const courseRating = parseNum(row.course_rating);
-    const slopeRating  = parseNum(row.slope_rating);
-    // No plain gross_score in API — use adjusted_gross_score for both fields
-    const ags          = parseNum(row.adjusted_gross_score);
-    const diff         = parseNum(row.differential);
+    // Handle multiple known date field names across GHIN associations
+    const rawDate = String(row.played_at ?? row.score_date ?? row.played_date ?? row.date_played ?? '');
+    const datePlayed = rawDate.slice(0, 10);
+    const courseName = String(row.course_name ?? row.facility_name ?? row.course ?? '');
+    const courseRating = parseNum(row.course_rating ?? row.cr);
+    const slopeRating  = parseNum(row.slope_rating ?? row.slope ?? row.sr);
+    // adjusted_gross_score or gross_score or score (value may include type letter)
+    const ags = parseNum(row.adjusted_gross_score ?? row.gross_score ?? row.score ?? row.adj_score);
+    const diff = parseNum(row.differential ?? row.diff ?? row.handicap_differential);
 
     // Only hard-require date, course name, and a score — rating/differential can be null
     if (!datePlayed || !courseName || ags == null) continue;
