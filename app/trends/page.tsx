@@ -48,7 +48,7 @@ export default async function TrendsPage() {
     const lastName = playerNameMap[r.player_id] ?? '';
     if (lastName === 'Mitchell') continue;
     if (!roundsPerPlayer[r.player_id]) roundsPerPlayer[r.player_id] = [];
-    if (roundsPerPlayer[r.player_id]!.length < 3) {
+    if (roundsPerPlayer[r.player_id]!.length < 4) {
       roundsPerPlayer[r.player_id]!.push(r);
     }
   }
