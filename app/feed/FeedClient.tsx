@@ -45,6 +45,7 @@ export default function FeedClient({ messages, photos, rounds, myPlayerId, myNam
   const [roundId, setRoundId] = useState('');
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -69,17 +70,26 @@ export default function FeedClient({ messages, photos, rounds, myPlayerId, myNam
   async function uploadPhoto() {
     if (!photoFile || !myPlayerId) return;
     setUploading(true);
+    setUploadError(null);
     const supabase = createClient();
     const ext = photoFile.name.split('.').pop() ?? 'jpg';
     const path = `${myPlayerId}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from('photos').upload(path, photoFile);
-    if (!error) {
-      await supabase.from('photos').insert({
-        uploader_id: myPlayerId,
-        storage_path: path,
-        caption: caption.trim() || null,
-        round_id: roundId || null,
-      });
+    const { error: storageError } = await supabase.storage.from('photos').upload(path, photoFile);
+    if (storageError) {
+      setUploadError(`Upload failed: ${storageError.message}`);
+      setUploading(false);
+      return;
+    }
+    const { error: dbError } = await supabase.from('photos').insert({
+      uploader_id: myPlayerId,
+      storage_path: path,
+      caption: caption.trim() || null,
+      round_id: roundId || null,
+    });
+    if (dbError) {
+      setUploadError(`Save failed: ${dbError.message}`);
+      setUploading(false);
+      return;
     }
     setPhotoFile(null);
     setPhotoPreview(null);
@@ -159,6 +169,7 @@ export default function FeedClient({ messages, photos, rounds, myPlayerId, myNam
                 <button onClick={uploadPhoto} disabled={uploading} className="btn btn-gilt btn-block">
                   <Camera size={14} />{uploading ? 'Uploading…' : 'Post Photo'}
                 </button>
+                {uploadError && <p style={{ color: '#c0392b', fontSize: '0.8rem', margin: 0 }}>{uploadError}</p>}
               </div>
             </div>
           )}

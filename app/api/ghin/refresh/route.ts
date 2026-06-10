@@ -73,10 +73,13 @@ export async function POST(req: NextRequest) {
 
       // Fetch recent rounds
       const { rounds: recentRounds } = await fetchRecentGhinRounds(token, player.ghin!, 20)
-        .catch(() => ({ rounds: [], rawResponse: null }));
+        .catch((e) => {
+          errors.push(`${player.name} rounds: ${(e as Error).message}`);
+          return { rounds: [], rawResponse: null };
+        });
 
       for (const round of recentRounds) {
-        await supabase.from('ghin_recent_rounds').upsert(
+        const { error: upsertErr } = await supabase.from('ghin_recent_rounds').upsert(
           {
             player_id: player.id,
             date_played: round.date_played,
@@ -91,6 +94,7 @@ export async function POST(req: NextRequest) {
           },
           { onConflict: 'player_id,date_played,course_name', ignoreDuplicates: false },
         );
+        if (upsertErr) errors.push(`${player.name} upsert: ${upsertErr.message}`);
       }
 
       // Keep only 20 most recent
