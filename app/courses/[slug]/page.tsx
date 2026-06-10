@@ -2,6 +2,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect, notFound } from 'next/navigation';
 import type { Course, Round, SignatureHole } from '@/lib/types';
 import CourseEditPanel from './CourseEditPanel';
+import CourseWeather from '@/components/CourseWeather';
 
 export const revalidate = 3600;
 
@@ -157,6 +158,20 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             <p className="section-label" style={{ marginBottom: 'var(--s-3)' }}>Notes</p>
             <p style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>{course.notes_md}</p>
           </div>
+        )}
+
+        {/* Weather forecast */}
+        {(rounds ?? []).length > 0 && (
+          <CourseWeather
+            slug={slug}
+            rounds={(rounds ?? []).map(r => ({
+              id: r.id,
+              round_no: r.round_no,
+              play_date: r.play_date,
+              tee_time: r.tee_time,
+              in_competition: r.in_competition,
+            }))}
+          />
         )}
 
         {isAdmin && <CourseEditPanel course={course} />}
