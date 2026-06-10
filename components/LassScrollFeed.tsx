@@ -73,6 +73,7 @@ function InfoCard({ title, body, onClose }: { title: string; body: string; onClo
           fontSize: '0.85rem',
           lineHeight: 1.55,
           color: 'rgba(255,255,255,0.9)',
+          whiteSpace: 'pre-line',
         }}>
           {body}
         </p>
