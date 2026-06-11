@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateLassOfTheDay } from '@/lib/lass-generator';
 
-// Image generation + upload can exceed the default 10s edge timeout
+// Must run as Node.js serverless — image gen + upload routinely takes 20-40s
+export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 export async function GET(req: NextRequest) {
