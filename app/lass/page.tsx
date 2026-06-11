@@ -71,7 +71,12 @@ export default async function LassPage() {
   }
 
   const items: LassFeedItem[] = (rows ?? []).map(row => {
-    const lassDate = row.created_at.slice(0, 10); // UTC date "YYYY-MM-DD"
+    // Lass is published at 3 AM PT — rounds from that day haven't been played yet.
+    // Show rounds from the previous calendar day instead.
+    const lassDate = row.created_at.slice(0, 10);
+    const prev = new Date(lassDate + 'T00:00:00Z');
+    prev.setUTCDate(prev.getUTCDate() - 1);
+    const roundDate = prev.toISOString().slice(0, 10);
     return {
       id: row.id,
       day_number: row.day_number,
@@ -82,7 +87,7 @@ export default async function LassPage() {
       upvotes:     (row.lass_votes ?? []).filter(v => v.vote ===  1).length,
       downvotes:   (row.lass_votes ?? []).filter(v => v.vote === -1).length,
       userVote:    ((row.lass_votes ?? []).find(v => v.user_id === user.id)?.vote ?? null) as 1 | -1 | null,
-      roundsThatDay: roundsByDate[lassDate] ?? [],
+      roundsThatDay: roundsByDate[roundDate] ?? [],
       name:        row.name,
       fun_fact:    row.fun_fact,
       famous_irish: row.famous_irish,
