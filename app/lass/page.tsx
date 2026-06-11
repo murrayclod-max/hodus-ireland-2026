@@ -93,7 +93,7 @@ export default async function LassPage() {
     <LassScrollFeed
       items={items}
       isAdmin={isAdmin}
-      adminPanel={isAdmin ? <LassAdminPanel currentDayNumber={items[0]?.day_number} /> : undefined}
+      adminPanel={isAdmin ? <LassAdminPanel currentDayNumber={(items[0]?.day_number ?? 0) + 1} /> : undefined}
     />
   );
 }
