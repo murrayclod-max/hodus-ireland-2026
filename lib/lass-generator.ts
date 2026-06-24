@@ -93,7 +93,7 @@ export async function generateLassOfTheDay(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { responseModalities: ['IMAGE'] },
+          generationConfig: { responseModalities: ['IMAGE'], aspectRatio: '9:16' },
         }),
       }
     );

@@ -341,4 +341,6 @@ export const PROMPT_TEMPLATE = (profession: string, county: string, twist: strin
   `and high-waisted shorts or mini skirt. She is completely unbothered by her outfit. ` +
   `A county sign or chalkboard clearly visible reads "County ${county} · 95°F · Heat Wave Summer 2026". ` +
   `Warm cinematic colour grade, 85mm lens, f/1.4, shallow depth of field, golden hour rim light. ` +
-  `Full body in frame. Tasteful. Ultra photorealistic — looks like a real photograph. No text on subject.`;
+  `PORTRAIT ORIENTATION — vertical 9:16 composition, fills an iPhone screen like a magazine cover or Instagram Story. ` +
+  `Three-quarter or full-length shot with headroom at top and ground at bottom. Tasteful. ` +
+  `Ultra photorealistic — looks like a real photograph. No text on subject.`;
