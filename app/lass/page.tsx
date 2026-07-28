@@ -40,16 +40,19 @@ export default async function LassPage() {
 
   // Try with name column; fall back if migration hasn't run yet
   let rows: LassRow[] | null = null;
+  const now = new Date().toISOString();
   const { data: rowsFull, error: rowsError } = await db
     .from('lass_of_the_day')
     .select('id, day_number, profession, county, image_url, created_at, name, fun_fact, famous_irish, lass_votes(vote, user_id)')
     .eq('status', 'published')
+    .lte('created_at', now)
     .order('day_number', { ascending: false }) as { data: LassRow[] | null; error: unknown };
   if (rowsError) {
     const { data: rowsFallback } = await db
       .from('lass_of_the_day')
       .select('id, day_number, profession, county, image_url, created_at, fun_fact, famous_irish, lass_votes(vote, user_id)')
       .eq('status', 'published')
+      .lte('created_at', now)
       .order('day_number', { ascending: false }) as { data: LassRow[] | null };
     rows = (rowsFallback ?? []).map(r => ({ ...r, name: null }));
   } else {
