@@ -7,13 +7,18 @@ export const runtime = 'nodejs';
 export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  // Accept either a logged-in admin session or the CRON_SECRET bearer token
+  const auth = req.headers.get('authorization') ?? '';
+  const isCron = auth === `Bearer ${process.env.CRON_SECRET}`;
 
-  const { data: player } = await supabase
-    .from('players').select('is_admin').eq('auth_user_id', user.id).maybeSingle();
-  if (!player?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!isCron) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { data: player } = await supabase
+      .from('players').select('is_admin').eq('auth_user_id', user.id).maybeSingle();
+    if (!player?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   const body = await req.json().catch(() => ({})) as { days?: number[]; count?: number };
 
