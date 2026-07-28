@@ -57,22 +57,6 @@ function formatPosted(createdAt: string): string {
   });
 }
 
-export interface WaldoPlayer {
-  id: string;
-  name: string;
-  avatar_url: string;
-}
-
-// Deterministic position seeded by day number
-function waldoPos(dayNumber: number): { xPct: number; yPct: number } {
-  const a = ((dayNumber * 2654435769) >>> 0);
-  const b = ((dayNumber * 1597334677 + 99991) >>> 0);
-  return {
-    xPct: 8 + (a % 66),   // 8%–74% from left (avoid right pip strip)
-    yPct: 18 + (b % 45),  // 18%–63% from top (avoid top UI + bottom gradient)
-  };
-}
-
 export interface LassFeedItem {
   id: string;
   day_number: number;
@@ -158,19 +142,13 @@ function LassSlide({
   index,
   total,
   activeIndex,
-  players,
 }: {
   item: LassFeedItem;
   index: number;
   total: number;
   activeIndex: number;
-  players: WaldoPlayer[];
 }) {
-  const [popup, setPopup] = useState<'fact' | 'famous' | 'pronunciation' | 'waldo' | null>(null);
-  const [waldoFound, setWaldoFound] = useState(false);
-
-  const waldoPlayer = players.length > 0 ? players[(item.day_number - 1) % players.length] : null;
-  const { xPct, yPct } = waldoPos(item.day_number);
+  const [popup, setPopup] = useState<'fact' | 'famous' | 'pronunciation' | null>(null);
   const days = daysLeft(item.created_at);
 
   return (
@@ -197,40 +175,6 @@ function LassSlide({
           display: 'block',
         }}
       />
-
-      {/* Where's Waldo — hidden player face */}
-      {waldoPlayer && (
-        <button
-          onClick={() => { setWaldoFound(true); setPopup('waldo'); }}
-          style={{
-            position: 'absolute',
-            left: `${xPct}%`,
-            top: `${yPct}%`,
-            transform: 'translate(-50%, -50%)',
-            zIndex: 15,
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            cursor: 'pointer',
-            opacity: waldoFound ? 1 : 0.88,
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={waldoPlayer.avatar_url}
-            alt={waldoPlayer.name}
-            style={{
-              width: 46,
-              height: 46,
-              borderRadius: '50%',
-              objectFit: 'cover',
-              border: waldoFound ? '2.5px solid #4ade80' : '2.5px solid rgba(255,255,255,0.6)',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.55)',
-              display: 'block',
-            }}
-          />
-        </button>
-      )}
 
       {/* Top-left: rounds played that day */}
       {item.roundsThatDay && item.roundsThatDay.length > 0 && (
@@ -423,13 +367,6 @@ function LassSlide({
           onClose={() => setPopup(null)}
         />
       )}
-      {popup === 'waldo' && waldoPlayer && (
-        <InfoCard
-          title="Where's Waldo 🕵️"
-          body={`You found ${waldoPlayer.name.split(' ')[0]}! 🎉\n\nHiding in plain sight on every lass. Keep an eye out for the other lads…`}
-          onClose={() => setPopup(null)}
-        />
-      )}
 
       {/* Scroll hint on first slide */}
       {index === 0 && activeIndex === 0 && (
@@ -457,11 +394,10 @@ function LassSlide({
   );
 }
 
-export default function LassScrollFeed({ items, isAdmin, adminPanel, players = [] }: {
+export default function LassScrollFeed({ items, isAdmin, adminPanel }: {
   items: LassFeedItem[];
   isAdmin: boolean;
   adminPanel?: React.ReactNode;
-  players?: WaldoPlayer[];
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -513,7 +449,6 @@ export default function LassScrollFeed({ items, isAdmin, adminPanel, players = [
             index={i}
             total={items.length}
             activeIndex={activeIndex}
-            players={players}
           />
         ))}
 

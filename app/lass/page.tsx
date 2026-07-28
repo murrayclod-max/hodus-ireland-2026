@@ -1,7 +1,7 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import LassAdminPanel from '@/components/LassAdminPanel';
-import LassScrollFeed, { LassFeedItem, WaldoPlayer } from '@/components/LassScrollFeed';
+import LassScrollFeed, { LassFeedItem } from '@/components/LassScrollFeed';
 
 export const revalidate = 60;
 
@@ -56,12 +56,6 @@ export default async function LassPage() {
     rows = rowsFull;
   }
 
-  const { data: playerRows } = await db
-    .from('players')
-    .select('id, name, avatar_url')
-    .not('avatar_url', 'is', null)
-    .order('name') as { data: WaldoPlayer[] | null };
-
   const { data: roundRows } = await db
     .from('ghin_recent_rounds')
     .select('player_id, date_played, course_name, gross_score, players(name)')
@@ -105,7 +99,6 @@ export default async function LassPage() {
       items={items}
       isAdmin={isAdmin}
       adminPanel={isAdmin ? <LassAdminPanel currentDayNumber={(items[0]?.day_number ?? 0) + 1} /> : undefined}
-      players={playerRows ?? []}
     />
   );
 }
