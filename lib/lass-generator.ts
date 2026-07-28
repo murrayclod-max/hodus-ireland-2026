@@ -77,7 +77,7 @@ export async function generateLassOfTheDay(
 
   // ── Build prompt with vote feedback appended ────────────────────────────────
   const voteContext = await buildVoteContext(service);
-  const prompt = PROMPT_TEMPLATE(spec.profession, spec.county, spec.twist) + voteContext;
+  const prompt = PROMPT_TEMPLATE(spec.profession, spec.county, spec.twist, spec.hidden_golfer) + voteContext;
 
   // ── Call Gemini image generation API ───────────────────────────────────────
   let base64Image: string;
