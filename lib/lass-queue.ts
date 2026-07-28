@@ -1012,29 +1012,51 @@ export const LASS_QUEUE: DaySpec[] = [
   },
 ];
 
-export const PROMPT_TEMPLATE = (profession: string, county: string, twist: string, hiddenGolfer?: string): string =>
-  `Ultra-photorealistic photograph — indistinguishable from a real photo, warm cinematic quality. ` +
-  `[STYLE: match these reference photos — natural Irish settings, golden light, real candid energy, ` +
-  `NOT AI art, looks like it was shot by a professional photographer on location in Ireland]. ` +
-  `County ${county}, Ireland. Summer 2026 heat wave — 95°F / 35°C. ` +
-  `A genuine fitness model in her mid-20s — think Women's Health or Shape magazine cover. ` +
-  `Striking face: strong defined jaw, full lips, intense green eyes with thick lashes, high cheekbones. ` +
-  `Body: visibly toned — flat stomach with defined abs, toned athletic arms and legs, naturally full figure. ` +
-  `Thick wavy auburn hair, warm freckled skin glowing in the sun. ` +
-  `She is a ${profession}. THE SCENE: ${twist}. ` +
-  `She is dressed for the brutal heat — bikini top with any essential ` +
-  `job accessories (tool belt, badge, stethoscope, hat, etc.) worn over it, ` +
-  `and high-waisted shorts or mini skirt. She is completely unbothered by her outfit. ` +
-  `A county sign or chalkboard clearly visible reads "County ${county} · 95°F · Heat Wave Summer 2026". ` +
-  `Warm cinematic colour grade, 85mm lens, f/1.4, shallow depth of field, golden hour rim light. ` +
-  `PORTRAIT ORIENTATION — vertical 9:16 composition, fills an iPhone screen like a magazine cover or Instagram Story. ` +
-  `Three-quarter or full-length shot with headroom at top and ground at bottom. Tasteful. ` +
-  `Ultra photorealistic — looks like a real photograph. No text on subject.` +
-  (hiddenGolfer
-    ? ` HIDDEN EASTER EGG: Somewhere in the background — barely noticeable but definitely there if you look closely — ` +
-      `is a middle-aged American man named ${hiddenGolfer}. He is NOT the main subject. ` +
-      `He could be a tourist walking past in the far distance, a face visible through a window, ` +
-      `someone sitting at a background table, a reflection in a mirror or glass, or a passerby on the street. ` +
-      `He is present, slightly out of place in the Irish scene, and findable on close inspection. ` +
-      `Think Where's Waldo — tucked in, subtle, but real. The lads in his group will be looking for him.`
-    : '');
+// Physical appearance descriptions for each golfer — used in the Waldo easter egg prompt
+// so the generated background figure is actually recognisable to the group.
+const GOLFER_LOOKS: Record<string, string> = {
+  'Dan Murray':      'stocky build, short gray-brown hair, bright blue eyes, big loud laugh, usually in a white or blue collar shirt',
+  'Dave Harris':     'dark brown hair, full dark beard, very wide toothy smile, rugged outdoorsy look',
+  'Eric Strong':     'brown hair, lean athletic build, clean-shaven, outdoorsy casual style',
+  'Galen Archibald': 'brown hair, clean-shaven, broad athletic shoulders, chiselled jaw, blazer or sport coat',
+  'Jeff Pinksa':     'dark brown hair, clean-shaven, extremely wide grin, lean athletic build, often in bright casual shirts',
+  'Jim Hughes':      'long shoulder-length light-brown hair, lean artistic build, bohemian style',
+  'Jim Mitchell':    'silver-white hair (or close-cropped), often wearing sunglasses, relaxed easygoing demeanor, light complexion',
+  'Joe Gulash':      'reddish-brown hair, clean-cut professional look, medium athletic build',
+  'Lee Einhorn':     'backward baseball cap, thick black-frame glasses, beard stubble, hipster-edgy streetwear vibe',
+  'Matt Burns':      'medium build, brown hair, average American tourist look',
+  'Matt Hodus':      'dark hair, full dark beard, well-dressed, confident professional bearing',
+  'Todd Moutafian':  'baseball cap, lean wiry build, light stubble, sporty athletic gear',
+};
+
+export const PROMPT_TEMPLATE = (profession: string, county: string, twist: string, hiddenGolfer?: string): string => {
+  const looks = hiddenGolfer ? (GOLFER_LOOKS[hiddenGolfer] ?? 'middle-aged American tourist') : '';
+  return (
+    `Ultra-photorealistic photograph — indistinguishable from a real photo, warm cinematic quality. ` +
+    `[STYLE: match these reference photos — natural Irish settings, golden light, real candid energy, ` +
+    `NOT AI art, looks like it was shot by a professional photographer on location in Ireland]. ` +
+    `County ${county}, Ireland. Summer 2026 heat wave — 95°F / 35°C. ` +
+    `A genuine fitness model in her mid-20s — think Women's Health or Shape magazine cover. ` +
+    `Striking face: strong defined jaw, full lips, intense green eyes with thick lashes, high cheekbones. ` +
+    `Body: visibly toned — flat stomach with defined abs, toned athletic arms and legs, naturally full figure. ` +
+    `Thick wavy auburn hair, warm freckled skin glowing in the sun. ` +
+    `She is a ${profession}. THE SCENE: ${twist}. ` +
+    `She is dressed for the brutal heat — bikini top with any essential ` +
+    `job accessories (tool belt, badge, stethoscope, hat, etc.) worn over it, ` +
+    `and high-waisted shorts or mini skirt. She is completely unbothered by her outfit. ` +
+    `A county sign or chalkboard clearly visible reads "County ${county} · 95°F · Heat Wave Summer 2026". ` +
+    `Warm cinematic colour grade, 85mm lens, f/1.4, shallow depth of field, golden hour rim light. ` +
+    `PORTRAIT ORIENTATION — vertical 9:16 composition, fills an iPhone screen like a magazine cover or Instagram Story. ` +
+    `Three-quarter or full-length shot with headroom at top and ground at bottom. Tasteful. ` +
+    `Ultra photorealistic — looks like a real photograph. No text on subject.` +
+    (hiddenGolfer
+      ? ` HIDDEN EASTER EGG: Somewhere in the background — subtle but definitely there if you look — ` +
+        `is a real specific man named ${hiddenGolfer}. He looks like this: ${looks}. ` +
+        `Render him accurately so his friends would recognise him — same hair, same face shape, same build. ` +
+        `He is NOT the main subject and takes up little of the frame. ` +
+        `He could be a tourist walking past in the far distance, a face visible through a window, ` +
+        `someone sitting at a background table, a reflection in a mirror or glass, or a passerby on the street. ` +
+        `He is slightly out of place in the Irish scene. Think Where's Waldo — tucked in, findable, but real.`
+      : '')
+  );
+};
