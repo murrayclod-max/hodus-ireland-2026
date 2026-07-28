@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { generateLassOfTheDay } from '@/lib/lass-generator';
 import { LASS_QUEUE } from '@/lib/lass-queue';
 
@@ -29,7 +29,8 @@ export async function POST(req: NextRequest) {
     daysToGenerate = body.days;
   } else {
     // Auto-detect: find all days with specs that are missing or failed
-    const { data: existing } = await supabase
+    const db = await createServiceClient();
+    const { data: existing } = await db
       .from('lass_of_the_day')
       .select('day_number, status');
 
