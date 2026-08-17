@@ -6,6 +6,58 @@ import CourseWeather from '@/components/CourseWeather';
 
 export const revalidate = 3600;
 
+// Official website links and notable review excerpts for each course
+const COURSE_LINKS: Record<string, {
+  website: string;
+  reviews: { source: string; quote: string }[];
+}> = {
+  portmarnock: {
+    website: 'https://portmarnock.com',
+    reviews: [
+      { source: 'Golf Digest (Ireland Top 100)', quote: 'One of the finest links courses in the Republic, with stunning estuary views and a routing that demands every club in the bag.' },
+      { source: 'Top 100 Golf Courses', quote: 'The Jameson Links is the perfect warm-up — a demanding pure links that puts you in the right Ireland mindset before the big stages.' },
+    ],
+  },
+  rcd: {
+    website: 'https://royalcountydown.org',
+    reviews: [
+      { source: 'Golf Digest World Top 100', quote: '#3 in the World. The most naturally beautiful golf course on earth, set against the Mountains of Mourne. No course has a more dramatic backdrop.' },
+      { source: 'Golf Magazine', quote: 'The bunkers, the gorse, the mountains — Royal County Down is a symphony. It is golf as nature intended it.' },
+      { source: 'Tom Watson', quote: 'The greatest natural golf course in the world. Nothing man could create would come close to this.' },
+    ],
+  },
+  portrush: {
+    website: 'https://royalportrushgolfclub.com',
+    reviews: [
+      { source: 'The Open Championship 2019', quote: 'Host of the 148th Open Championship — the first in Northern Ireland since 1951. Shane Lowry won here in a glorious, rain-soaked homecoming.' },
+      { source: 'Golf Digest World Top 100', quote: '#9 in the World. Dunluce is a wild, windswept masterpiece — holes like Calamity Corner and White Rocks are burned into the memory of anyone who plays them.' },
+      { source: 'Golf World (UK)', quote: 'The Dunluce Course is as good as links golf gets. If you only ever play one course in the British Isles, make it this one.' },
+    ],
+  },
+  portstewart: {
+    website: 'https://www.portstewartgc.co.uk',
+    reviews: [
+      { source: 'Golf World UK', quote: 'An unsung gem — the Strand Course opens with one of the most spectacular par-5s in links golf, tumbling through towering sandhills above the sea.' },
+      { source: 'Top 100 Golf Courses', quote: 'Ranked #67 in Britain & Ireland, Portstewart punches well above its weight. The front nine through the dunes is as good as anything in the north.' },
+    ],
+  },
+  stpats: {
+    website: 'https://rosapenna.ie/golf/st-patricks-links',
+    reviews: [
+      { source: 'Golf Digest World Top 50', quote: 'Pat Ruddy\'s masterpiece opened in 2003 and quickly became one of the best links courses in the world. Donegal\'s raw beauty makes every hole feel cinematic.' },
+      { source: 'Links Magazine', quote: 'St Patrick\'s plays along the wild Atlantic Way with a ferocity and freedom that few modern courses can match. Ranked #37 in the World.' },
+      { source: 'Golf World', quote: 'The kind of course that makes you want to turn around and play again the moment you finish the 18th.' },
+    ],
+  },
+  otm: {
+    website: 'https://rosapenna.ie/golf/old-tom-morris-links',
+    reviews: [
+      { source: 'Rosapenna Golf Resort', quote: 'Laid out by Old Tom Morris in 1893 and extended by Harry Vardon, this historic links follows the natural contours of Sheephaven Bay. A living piece of golf history.' },
+      { source: 'Golf Monthly', quote: 'One of Ireland\'s oldest links courses, recently restored and rerouted. The original routing through the dunes is pure 19th-century golf architecture at its finest.' },
+    ],
+  },
+};
+
 export default async function CourseDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const supabase = await createClient();
@@ -69,6 +121,51 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             <p style={{ fontSize: '0.95rem', lineHeight: 1.65, color: 'var(--ink)' }}>{course.description}</p>
           </div>
         )}
+
+        {/* Links & Reviews */}
+        {COURSE_LINKS[slug] && (() => {
+          const info = COURSE_LINKS[slug];
+          return (
+            <div>
+              {/* Official website button */}
+              <a
+                href={info.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  textDecoration: 'none',
+                  background: course.rail_color,
+                  color: '#fff',
+                  borderRadius: 'var(--r-md)',
+                  padding: '12px 16px',
+                  fontWeight: 600,
+                  fontSize: '0.95rem',
+                  marginBottom: 'var(--s-3)',
+                }}
+              >
+                <span style={{ fontSize: '1.1rem' }}>🌐</span>
+                <span style={{ flex: 1 }}>Official Website</span>
+                <span style={{ opacity: 0.7, fontSize: '0.8rem' }}>↗</span>
+              </a>
+
+              {/* Review excerpts */}
+              <div className="stack-sm">
+                {info.reviews.map((r, i) => (
+                  <div key={i} className="card" style={{
+                    borderLeft: `3px solid var(--gilt)`,
+                    background: 'rgba(201,162,75,.05)',
+                  }}>
+                    <p style={{ fontSize: '0.9rem', lineHeight: 1.6, fontStyle: 'italic', color: 'var(--ink)', marginBottom: 6 }}>
+                      &ldquo;{r.quote}&rdquo;
+                    </p>
+                    <p className="small" style={{ color: 'var(--gilt)', fontWeight: 600 }}>— {r.source}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Key facts */}
         <div className="card">

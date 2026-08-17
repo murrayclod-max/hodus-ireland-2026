@@ -21,7 +21,8 @@ const CARTOON_CAPTIONS: Record<string, string> = {
   'Lee Einhorn':     'Professional beekeeper',
   'Dave Harris':     'Ferret racing enthusiast',
   'Todd Moutafian':  'Hot dog eating champion',
-  'Matt Burns':      'TBD',
+  'Matt Burns':      'Competitive cheese roller',
+  'Rob Cohen':       'Competitive caber tosser',
 };
 
 function cartoonUrl(playerId: string) {

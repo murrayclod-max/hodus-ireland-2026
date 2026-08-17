@@ -327,7 +327,7 @@ export const LASS_QUEUE: DaySpec[] = [
   },
 
   // ── Days 36–83: varied professions ──────────────────────────────────────────
-  // hidden_golfer rotates through the 12 lads: Dan, Dave, Eric, Galen, Jeff, Jim H, Jim M, Joe, Lee, Matt B, Matt H, Todd
+  // hidden_golfer rotates through the 13 lads: Dan, Dave, Eric, Galen, Jeff, Jim H, Jim M, Joe, Lee, Matt B, Matt H, Rob, Todd
   {
     day_number: 36,
     profession: 'nurse',
@@ -1023,6 +1023,7 @@ const GOLFER_LOOKS: Record<string, string> = {
   'Jim Hughes':      'long shoulder-length light-brown hair, lean artistic build, bohemian style',
   'Jim Mitchell':    'silver-white hair (or close-cropped), often wearing sunglasses, relaxed easygoing demeanor, light complexion',
   'Joe Gulash':      'reddish-brown hair, clean-cut professional look, medium athletic build',
+  'Rob Cohen':       'dark hair, athletic build, warm friendly smile, sharp casual style',
   'Lee Einhorn':     'backward baseball cap, thick black-frame glasses, beard stubble, hipster-edgy streetwear vibe',
   'Matt Burns':      'medium build, brown hair, average American tourist look',
   'Matt Hodus':      'dark hair, full dark beard, well-dressed, confident professional bearing',

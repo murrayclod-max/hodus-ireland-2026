@@ -38,6 +38,7 @@ const PALETTE = [
   '#f4511e', // deep orange  (9 Matt Burns)   was dark brown #795548
   '#5e35b1', // deep purple  (10 Matt Hodus)
   '#7cb342', // lime green   (11 Todd Moutafian)
+  '#4fc3f7', // light blue   (12 Rob Cohen)
 ];
 
 const TEAM_COLOR = { murray: '#3d9e59', harris: '#c84545' } as const;

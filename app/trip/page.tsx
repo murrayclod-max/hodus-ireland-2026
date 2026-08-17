@@ -47,7 +47,7 @@ export default async function TripPage() {
       <div className="page-header">
         <div className="wrap">
           <h1>The Trip</h1>
-          <p className="sub">Sept 13–20, 2026 · Northern Ireland &amp; Donegal</p>
+          <p className="sub">Sept 11–20, 2026 · Dublin · Northern Ireland · Donegal</p>
         </div>
       </div>
 
@@ -92,7 +92,12 @@ export default async function TripPage() {
                   <div key={item.id} className="card" style={{ position: 'relative' }}>
                     <div className="row-between">
                       <div className="row" style={{ gap: 'var(--s-2)', flex: 1 }}>
-                        <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{kindIcon(item.kind)}</span>
+                        <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{
+                          // Detect restaurant/dining notes by title keywords
+                          item.kind === 'note' && /dinner|steakhouse|bistro|pub crawl|restaurant|bar(?!\w)/i.test(item.title)
+                            ? '🍽️'
+                            : kindIcon(item.kind)
+                        }</span>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 600 }}>{item.title}</div>
                           {item.detail && <p className="small muted" style={{ marginTop: 2 }}>{item.detail}</p>}
@@ -114,6 +119,46 @@ export default async function TripPage() {
         <div className="card" style={{ background: 'rgba(201,162,75,.08)', borderColor: 'var(--gilt)' }}>
           <p style={{ fontWeight: 500 }}>📞 Booked through <strong>Hidden Links</strong></p>
           <p className="small muted" style={{ marginTop: 4 }}>Rosapenna (Rounds 4–6) is self-arranged through the hotel directly.</p>
+        </div>
+
+        {/* Cash & Caddies */}
+        <div className="card">
+          <p className="section-label" style={{ marginBottom: 'var(--s-3)' }}>Cash — Read This One</p>
+          <p className="small" style={{ marginBottom: 'var(--s-3)', fontWeight: 600 }}>Bring £300 and €500 each. Draw it before you leave, or at Dublin airport.</p>
+          <p className="small muted" style={{ marginBottom: 'var(--s-3)' }}>Caddies are paid in cash directly at the end of each round. Royal County Down has no ATM on site.</p>
+          <div className="stack-sm">
+            <div className="row-between small"><span className="muted">Portmarnock</span><span>€60–70 fee + €20–30 tip</span></div>
+            <div className="row-between small"><span className="muted">Royal County Down</span><span>£60 fee + £20–30 tip</span></div>
+            <div className="row-between small"><span className="muted">Royal Portrush</span><span>£60–80 fee + £20–30 tip</span></div>
+            <div className="row-between small"><span className="muted">Portstewart</span><span>~£70 at your discretion</span></div>
+            <div className="row-between small"><span className="muted">Rosapenna (×3)</span><span>€90/round + €20–30 tip each</span></div>
+          </div>
+          <div className="stack-sm" style={{ marginTop: 'var(--s-3)', paddingTop: 'var(--s-3)', borderTop: '1px solid var(--border)' }}>
+            <div className="row-between small"><span className="muted">Sat 12</span><span>Portmarnock — euros</span></div>
+            <div className="row-between small"><span className="muted">Sun 13 – Wed 16</span><span>Newcastle &amp; Portrush — pounds</span></div>
+            <div className="row-between small"><span className="muted">Thu 17 – Sun 20</span><span>Rosapenna &amp; Dublin — euros</span></div>
+          </div>
+        </div>
+
+        {/* Key Contacts */}
+        <div className="card">
+          <p className="section-label" style={{ marginBottom: 'var(--s-3)' }}>Key Contacts</p>
+          <div className="stack-sm">
+            <div className="row"><span style={{ fontSize: '1rem' }}>📋</span><div><div style={{ fontWeight: 500 }}>Vari — Hidden Links Ireland</div><div className="small muted">ireland@hiddenlinksgolf.com · +353 386 693 3369</div></div></div>
+            <div className="row"><span style={{ fontSize: '1rem' }}>📋</span><div><div style={{ fontWeight: 500 }}>Meredith Emerson — Hidden Links</div><div className="small muted">memerson@hiddenlinksgolf.com · (678) 444-4267</div></div></div>
+            <div className="row"><span style={{ fontSize: '1rem' }}>🏨</span><div><div style={{ fontWeight: 500 }}>Rosapenna Hotel</div><div className="small muted">reservations@rosapenna.ie · +353 74 91 55301</div></div></div>
+            <div className="row"><span style={{ fontSize: '1rem' }}>⛳</span><div><div style={{ fontWeight: 500 }}>Royal County Down</div><div className="small muted">+44 28 4372 3314</div></div></div>
+            <div className="row"><span style={{ fontSize: '1rem' }}>⛳</span><div><div style={{ fontWeight: 500 }}>Portstewart Golf Club</div><div className="small muted">+44 28 7083 2015</div></div></div>
+            <div className="row"><span style={{ fontSize: '1rem' }}>🍽</span><div><div style={{ fontWeight: 500 }}>The Olde Glen, Carrickart</div><div className="small muted">+353 83 158 5777</div></div></div>
+            <div className="row"><span style={{ fontSize: '1rem' }}>🍽</span><div><div style={{ fontWeight: 500 }}>Villa Vinci, Newcastle</div><div className="small muted">+44 28 4372 3080</div></div></div>
+            <div className="row"><span style={{ fontSize: '1rem' }}>🍽</span><div><div style={{ fontWeight: 500 }}>The White Pheasant, Portrush</div><div className="small muted">+44 28 7082 6611</div></div></div>
+          </div>
+        </div>
+
+        {/* UK ETA reminder */}
+        <div className="card" style={{ background: 'rgba(201,162,75,.08)', borderColor: 'var(--gilt)' }}>
+          <p style={{ fontWeight: 500 }}>🛂 UK ETA Required for Northern Ireland</p>
+          <p className="small muted" style={{ marginTop: 4 }}>£20 · "UK ETA" app · Approved in minutes. Get it before you fly — not the morning of.</p>
         </div>
       </div>
     </div>

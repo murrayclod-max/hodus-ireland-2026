@@ -41,5 +41,5 @@ export function daysBetween(from: Date, to: Date): number {
 }
 
 export function kindIcon(kind: string): string {
-  return { travel: '✈', golf: '⛳', lodging: '🏨', note: '📌' }[kind] ?? '•';
+  return { travel: '✈', golf: '⛳', lodging: '🏨', note: '📌', dining: '🍽️' }[kind] ?? '•';
 }

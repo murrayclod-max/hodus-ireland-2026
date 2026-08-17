@@ -1,6 +1,6 @@
 export type Team = 'murray' | 'harris';
 export type MatchStatus = 'pending' | 'live' | 'final';
-export type ItineraryKind = 'travel' | 'golf' | 'lodging' | 'note';
+export type ItineraryKind = 'travel' | 'golf' | 'lodging' | 'note' | 'dining';
 export type FlightDirection = 'out' | 'return';
 export type HoleResult = 'murray' | 'harris' | 'halved';
 export type RoundFormat = 'fourball' | 'altshot';
