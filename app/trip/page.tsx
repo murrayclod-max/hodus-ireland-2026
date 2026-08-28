@@ -7,6 +7,20 @@ import EditItineraryItem from './EditItineraryItem';
 
 export const revalidate = 60;
 
+// Turn URLs and in-app paths inside an itinerary detail into tappable links
+const LINK_RE = /(https?:\/\/[^\s]+|(?:^|(?<=\s))\/[a-z][a-z0-9\-/]*)/gi;
+
+function linkify(text: string) {
+  return text.split(LINK_RE).map((part, i) => {
+    if (!/^(https?:\/\/|\/[a-z])/i.test(part)) return part;
+    const href = part.replace(/[.,;:]$/, '');
+    const label = href.startsWith('/') ? 'View tickets →' : href;
+    return (
+      <Link key={i} href={href} style={{ color: 'var(--green)', fontWeight: 600 }}>{label}</Link>
+    );
+  });
+}
+
 function groupByDate(items: ItineraryItem[]) {
   const map = new Map<string, ItineraryItem[]>();
   for (const item of items) {
@@ -53,6 +67,45 @@ export default async function TripPage() {
 
       <div className="wrap stack-lg" style={{ paddingTop: 'var(--s-5)', paddingBottom: 'var(--s-6)' }}>
 
+        {/* Who to call — driver + tour operator, kept at the top on purpose */}
+        <div className="card" style={{ borderColor: 'var(--green)', borderWidth: 1.5 }}>
+          <p className="section-label" style={{ marginBottom: 'var(--s-3)' }}>Who to Call</p>
+          <div className="stack-sm">
+            <div className="row">
+              <span style={{ fontSize: '1.1rem' }}>🚌</span>
+              <div>
+                <div style={{ fontWeight: 600 }}>Virginius — coach driver</div>
+                <div className="small muted">
+                  <a href="tel:+353861795648" style={{ color: 'var(--green)', fontWeight: 600 }}>+353 86 179 5648</a> · with us Sep 13–19
+                </div>
+              </div>
+            </div>
+            <div className="row">
+              <span style={{ fontSize: '1.1rem' }}>📋</span>
+              <div>
+                <div style={{ fontWeight: 600 }}>Vari — Hidden Links Ireland</div>
+                <div className="small muted">
+                  <a href="tel:+3533866933369" style={{ color: 'var(--green)', fontWeight: 600 }}>+353 386 693 3369</a> ·{' '}
+                  <a href="mailto:ireland@hiddenlinksgolf.com" style={{ color: 'var(--green)' }}>ireland@hiddenlinksgolf.com</a>
+                </div>
+              </div>
+            </div>
+            <div className="row">
+              <span style={{ fontSize: '1.1rem' }}>📋</span>
+              <div>
+                <div style={{ fontWeight: 600 }}>Meredith Emerson — Hidden Links (US)</div>
+                <div className="small muted">
+                  <a href="tel:+16784444267" style={{ color: 'var(--green)', fontWeight: 600 }}>(678) 444-4267</a> ·{' '}
+                  <a href="mailto:memerson@hiddenlinksgolf.com" style={{ color: 'var(--green)' }}>memerson@hiddenlinksgolf.com</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p className="small muted" style={{ marginTop: 'var(--s-3)' }}>
+            Bus problem, late tee time, lost bag — Virginius first, Vari second.
+          </p>
+        </div>
+
         {/* Trip summary */}
         <div className="card">
           <p className="section-label" style={{ marginBottom: 'var(--s-3)' }}>Hotels</p>
@@ -94,13 +147,15 @@ export default async function TripPage() {
                       <div className="row" style={{ gap: 'var(--s-2)', flex: 1 }}>
                         <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{
                           // Detect restaurant/dining notes by title keywords
-                          item.kind === 'note' && /dinner|steakhouse|bistro|pub crawl|restaurant|bar(?!\w)/i.test(item.title)
-                            ? '🍽️'
-                            : kindIcon(item.kind)
+                          item.kind === 'note' && /guinness|brewery|distillery/i.test(item.title)
+                            ? '🍺'
+                            : item.kind === 'note' && /dinner|steakhouse|bistro|pub crawl|restaurant|bar(?!\w)/i.test(item.title)
+                              ? '🍽️'
+                              : kindIcon(item.kind)
                         }</span>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 600 }}>{item.title}</div>
-                          {item.detail && <p className="small muted" style={{ marginTop: 2 }}>{item.detail}</p>}
+                          {item.detail && <p className="small muted" style={{ marginTop: 2 }}>{linkify(item.detail)}</p>}
                         </div>
                       </div>
                       {isAdmin && <EditItineraryItem item={item} />}
@@ -142,13 +197,13 @@ export default async function TripPage() {
 
         {/* Key Contacts */}
         <div className="card">
-          <p className="section-label" style={{ marginBottom: 'var(--s-3)' }}>Key Contacts</p>
+          <p className="section-label" style={{ marginBottom: 'var(--s-1)' }}>Key Contacts</p>
+          <p className="small muted" style={{ marginBottom: 'var(--s-3)' }}>Driver and Hidden Links are at the top of this page.</p>
           <div className="stack-sm">
-            <div className="row"><span style={{ fontSize: '1rem' }}>📋</span><div><div style={{ fontWeight: 500 }}>Vari — Hidden Links Ireland</div><div className="small muted">ireland@hiddenlinksgolf.com · +353 386 693 3369</div></div></div>
-            <div className="row"><span style={{ fontSize: '1rem' }}>📋</span><div><div style={{ fontWeight: 500 }}>Meredith Emerson — Hidden Links</div><div className="small muted">memerson@hiddenlinksgolf.com · (678) 444-4267</div></div></div>
             <div className="row"><span style={{ fontSize: '1rem' }}>🏨</span><div><div style={{ fontWeight: 500 }}>Rosapenna Hotel</div><div className="small muted">reservations@rosapenna.ie · +353 74 91 55301</div></div></div>
             <div className="row"><span style={{ fontSize: '1rem' }}>⛳</span><div><div style={{ fontWeight: 500 }}>Royal County Down</div><div className="small muted">+44 28 4372 3314</div></div></div>
             <div className="row"><span style={{ fontSize: '1rem' }}>⛳</span><div><div style={{ fontWeight: 500 }}>Portstewart Golf Club</div><div className="small muted">+44 28 7083 2015</div></div></div>
+            <div className="row"><span style={{ fontSize: '1rem' }}>🍺</span><div><div style={{ fontWeight: 500 }}>Guinness Storehouse</div><div className="small muted">+353 1 408 4800 · Ref 904474457 · <Link href="/tickets/guinness" style={{ color: 'var(--green)', fontWeight: 600 }}>tickets</Link></div></div></div>
             <div className="row"><span style={{ fontSize: '1rem' }}>🍽</span><div><div style={{ fontWeight: 500 }}>The Olde Glen, Carrickart</div><div className="small muted">+353 83 158 5777</div></div></div>
             <div className="row"><span style={{ fontSize: '1rem' }}>🍽</span><div><div style={{ fontWeight: 500 }}>Villa Vinci, Newcastle</div><div className="small muted">+44 28 4372 3080</div></div></div>
             <div className="row"><span style={{ fontSize: '1rem' }}>🍽</span><div><div style={{ fontWeight: 500 }}>The White Pheasant, Portrush</div><div className="small muted">+44 28 7082 6611</div></div></div>

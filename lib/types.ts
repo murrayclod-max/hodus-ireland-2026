@@ -174,3 +174,18 @@ export interface Ace {
   created_at: string;
   players?: Player;
 }
+
+export interface PackingCategory {
+  id: string;
+  name: string;
+  emoji: string | null;
+  sort: number;
+}
+
+export interface PackingItem {
+  id: string;
+  category_id: string;
+  label: string;
+  note: string | null;
+  sort: number;
+}

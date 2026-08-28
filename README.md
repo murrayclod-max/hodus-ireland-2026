@@ -78,7 +78,9 @@ The app opens full-screen, no browser chrome, like a native app.
 | Tab | Route | What it does |
 |-----|-------|-------------|
 | Home | `/` | Countdown, live standings, next round card, quick links |
-| Trip | `/trip` | Day-by-day itinerary (editable by admins) |
+| Trip | `/trip` | Day-by-day itinerary (editable by admins), hotels, cash, key contacts |
+| Packing | `/packing` | Shared packing list — any member can edit items; tick marks are per-player |
+| Tickets | `/tickets/guinness` | Guinness Storehouse booking + the nine ticket codes |
 | Courses | `/courses` | Course list → detail (crest, par/yards, tee times, sig holes) |
 | Match | `/match` | Team standings, per-round pairings, link to live scoring |
 | Match scoring | `/match/[id]` | Hole-by-hole tap scoring, auto half-log on close-out |

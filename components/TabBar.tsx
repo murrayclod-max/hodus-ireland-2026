@@ -3,12 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Home, Map, Flag, Trophy, Plane, MessageCircle, Users, TrendingUp, Settings, Cloud, Sparkles } from 'lucide-react';
+import { Home, Map, Flag, Trophy, Plane, MessageCircle, Users, TrendingUp, Settings, Cloud, Sparkles, Luggage } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 const tabs = [
   { href: '/',         label: 'Home',    icon: Home },
   { href: '/trip',     label: 'Trip',    icon: Map },
+  { href: '/packing',  label: 'Packing', icon: Luggage },
   { href: '/courses',  label: 'Courses', icon: Flag },
   { href: '/match',    label: 'Match',   icon: Trophy },
   { href: '/lass',     label: 'Lass',    icon: Sparkles },
