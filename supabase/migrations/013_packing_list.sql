@@ -70,20 +70,21 @@ begin
     (cat_id, 'Wallet',                'credit cards, driver''s license', 2),
     (cat_id, 'Tip money',             'euros',                           3),
     (cat_id, 'UK ETA approval',       'needed for Northern Ireland — £20, get it before you fly', 4),
-    (cat_id, '£300 cash',             'caddies in the North are paid in pounds', 5),
-    (cat_id, '€500 cash',             'Portmarnock, Rosapenna & Dublin', 6),
+    (cat_id, '£300 cash',             'County Down £75, Portrush £80, Portstewart £70 — each plus a 25–35% tip', 5),
+    (cat_id, '€500 cash',             'Rosapenna caddies €90 a round, plus €15–20 per day for the driver', 6),
     (cat_id, 'Guinness Storehouse ticket', 'Fri 9/11, 2:45pm — ref 904474457', 7),
     (cat_id, 'Travel insurance card', null,                              8),
     (cat_id, 'Photo of passport page', 'on your phone, in case the real one walks', 9),
-    (cat_id, 'Tell your bank you''re travelling', 'or your card gets frozen at Dublin arrivals', 10);
+    (cat_id, 'Tell your bank you''re travelling', 'or your card gets frozen at Dublin arrivals', 10),
+    (cat_id, 'Proof of handicap',      'you''ll probably never be asked — but just in case', 11);
 
   select id into cat_id from packing_categories where name = 'Golf Gear';
   insert into packing_items (category_id, label, note, sort) values
-    (cat_id, 'Clubs',              null, 1),
-    (cat_id, 'Balls',              null, 2),
+    (cat_id, 'Clubs',              'leave the 64° wedge and the junk in the bottom of the bag at home', 1),
+    (cat_id, 'Balls',              'lots of them — far cheaper here than there; pack them in your suitcase, not the golf bag', 2),
     (cat_id, 'Gloves',             null, 3),
     (cat_id, 'Rain gloves',        null, 4),
-    (cat_id, '2 pairs golf shoes', null, 5),
+    (cat_id, '2 pairs golf shoes', 'in your suitcase too, in case the clubs go astray', 5),
     (cat_id, 'Goretex rain suit',  null, 6),
     (cat_id, 'Hat',                null, 7),
     (cat_id, 'Knit cap',           null, 8),
@@ -92,13 +93,12 @@ begin
     (cat_id, 'Travel bag for clubs', 'hard case or Club Glove — 6 flights of baggage handlers', 11),
     (cat_id, 'Tees & ball markers', null, 12),
     (cat_id, 'Divot tool',         null, 13),
-    (cat_id, 'Rangefinder + spare battery', null, 14),
-    (cat_id, '2 golf towels',      'one stays dry in the bag', 15),
-    (cat_id, 'Umbrella',           'links wind — a cheap one folds inside out', 16),
-    (cat_id, 'Rain hood for the bag', null, 17),
-    (cat_id, 'Spike wrench & spare spikes', null, 18),
-    (cat_id, 'Sharpie',            null, 19),
-    (cat_id, 'Hand warmers',       null, 20);
+    (cat_id, '2 golf towels',      'one stays dry in the bag', 14),
+    (cat_id, 'Rain hood for the bag', null, 15),
+    (cat_id, 'Spike wrench & spare spikes', null, 16),
+    (cat_id, 'Sharpie',            null, 17),
+    (cat_id, 'Hand warmers',       null, 18),
+    (cat_id, 'Lightweight carry bag', 'for any round where the caddies run short', 19);
 
   select id into cat_id from packing_categories where name = 'Golf Clothes';
   insert into packing_items (category_id, label, note, sort) values
@@ -106,7 +106,7 @@ begin
     (cat_id, '2 longsleeve undershirts', null, 2),
     (cat_id, '3 long pants for golf',    null, 3),
     (cat_id, '2 golf shorts',            null, 4),
-    (cat_id, '8 pairs golf socks',       null, 5),
+    (cat_id, '8 pairs golf socks',       'knee-length or sports socks if you plan to wear shorts', 5),
     (cat_id, '2 compression shorts',     null, 6),
     (cat_id, 'Wind vest',                null, 7),
     (cat_id, '2 quarter-zips / sweaters', 'merino beats cotton when it''s wet', 8),

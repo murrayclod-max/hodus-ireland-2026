@@ -234,20 +234,30 @@ export default async function TripPage() {
         <div className="card" style={{ background: 'rgba(201,162,75,.08)', borderColor: 'var(--gilt)' }}>
           <p style={{ fontWeight: 500 }}>📞 Booked through <strong>Hidden Links</strong></p>
           <p className="small muted" style={{ marginTop: 4 }}>Rosapenna (Rounds 4–6) is self-arranged through the hotel directly.</p>
+          <p className="small muted" style={{ marginTop: 4 }}>Dinner reservations need at least 24 hours&rsquo; notice to cancel — call the restaurant, not Vari.</p>
         </div>
 
         {/* Cash & Caddies */}
         <div className="card">
           <p className="section-label" style={{ marginBottom: 'var(--s-3)' }}>Cash — Read This One</p>
-          <p className="small" style={{ marginBottom: 'var(--s-3)', fontWeight: 600 }}>Bring £300 and €500 each. Draw it before you leave, or at Dublin airport.</p>
-          <p className="small muted" style={{ marginBottom: 'var(--s-3)' }}>Caddies are paid in cash directly at the end of each round. Royal County Down has no ATM on site.</p>
+          <p className="small" style={{ marginBottom: 'var(--s-3)', fontWeight: 600 }}>Roughly £300 and €500 each covers the week. ATMs are everywhere — ask Virginius to stop and top up rather than carrying the lot from home.</p>
+          <p className="small muted" style={{ marginBottom: 'var(--s-3)' }}>Cash is for caddies and the driver&rsquo;s tip; cards are fine for everything else. Caddies are paid directly, in cash, straight after each round. Royal County Down has no ATM on site.</p>
+
+          <p className="small" style={{ fontWeight: 600, marginBottom: 'var(--s-2)' }}>Caddie fees — single bag, per Hidden Links</p>
           <div className="stack-sm">
-            <div className="row-between small"><span className="muted">Portmarnock</span><span>€60–70 fee + €20–30 tip</span></div>
-            <div className="row-between small"><span className="muted">Royal County Down</span><span>£60 fee + £20–30 tip</span></div>
-            <div className="row-between small"><span className="muted">Royal Portrush</span><span>£60–80 fee + £20–30 tip</span></div>
-            <div className="row-between small"><span className="muted">Portstewart</span><span>~£70 at your discretion</span></div>
-            <div className="row-between small"><span className="muted">Rosapenna (×3)</span><span>€90/round + €20–30 tip each</span></div>
+            <div className="row-between small"><span className="muted">Royal County Down</span><span>£75 + tip</span></div>
+            <div className="row-between small"><span className="muted">Royal Portrush</span><span>£80 + tip</span></div>
+            <div className="row-between small"><span className="muted">Portstewart</span><span>£70 + tip</span></div>
+            <div className="row-between small"><span className="muted">Rosapenna (×3)</span><span>€90/round + tip · self-arranged</span></div>
+            <div className="row-between small"><span className="muted">Portmarnock</span><span>no caddies requested</span></div>
           </div>
+
+          <div className="stack-sm small" style={{ marginTop: 'var(--s-3)', paddingTop: 'var(--s-3)', borderTop: '1px solid var(--border)' }}>
+            <div><strong>Caddie tip: 25–35% on top of the fee.</strong> <span className="muted">So about £19–26 at County Down, £20–28 at Portrush, £18–25 at Portstewart. Double-check rates with the caddie master on the first tee — they&rsquo;re the last word.</span></div>
+            <div><strong>Driver tip: €15–20 per man, per day.</strong> <span className="muted">Virginius is with us Sep 13–19, so budget €105–140 each, handed over at the end of the trip.</span></div>
+            <div className="muted">Caddies are requested at every club but never guaranteed. If a club runs short on the day they may send double-bag caddies instead.</div>
+          </div>
+
           <div className="stack-sm" style={{ marginTop: 'var(--s-3)', paddingTop: 'var(--s-3)', borderTop: '1px solid var(--border)' }}>
             <div className="row-between small"><span className="muted">Sat 12</span><span>Portmarnock — euros</span></div>
             <div className="row-between small"><span className="muted">Sun 13 – Wed 16</span><span>Newcastle &amp; Portrush — pounds</span></div>

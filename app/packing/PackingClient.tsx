@@ -124,6 +124,13 @@ export default function PackingClient({ playerId, categories: initialCats, items
         )}
       </div>
 
+      <div>
+        <p className="section-label">Suggested Packing List</p>
+        <p className="small muted" style={{ marginTop: 4 }}>
+          Anyone can add to it, rename an item or bin one — edits are shared. Your ticks are yours alone.
+        </p>
+      </div>
+
       {/* Categories */}
       {cats.map(cat => {
         const list = byCategory.get(cat.id) ?? [];
@@ -227,11 +234,35 @@ export default function PackingClient({ playerId, categories: initialCats, items
         </div>
       )}
 
+      {/* Hidden Links guidance — from Vari's pre-trip note */}
+      <div className="card">
+        <p className="section-label" style={{ marginBottom: 'var(--s-3)' }}>Hidden Links Says: Leave It At Home</p>
+        <div className="stack-sm small">
+          <div><strong>Umbrella.</strong> <span className="muted">Absolutely no use on a links course.</span></div>
+          <div><strong>Rangefinder / GPS.</strong> <span className="muted">Your caddie knows every yardage and the club you should hit.</span></div>
+          <div><strong>A pile of golf shirts.</strong> <span className="muted">Between layering and the pro shops, you need fewer than you think.</span></div>
+          <div><strong>Sport jacket.</strong> <span className="muted">Everywhere we eat is smart casual.</span></div>
+          <div><strong>The clubs you never hit.</strong> <span className="muted">And the junk in the bottom of the bag. It all weighs something.</span></div>
+          <div><strong>Work.</strong> <span className="muted">It isn&rsquo;t happening.</span></div>
+        </div>
+      </div>
+
       <div className="card" style={{ background: 'rgba(201,162,75,.08)', borderColor: 'var(--gilt)' }}>
-        <p style={{ fontWeight: 500 }}>🧳 One list, twelve bags</p>
+        <p style={{ fontWeight: 500 }}>⛳ Pack shoes and balls in your suitcase</p>
         <p className="small muted" style={{ marginTop: 4 }}>
-          Edits to the list are shared with everyone. Your ticks are private — no one sees whether you remembered the rain gloves.
+          Not in the golf bag. If the clubs are delayed and you&rsquo;re on rental sticks for a day, at least you&rsquo;ll have
+          your own shoes and your own balls. Bring plenty of balls — they cost a fortune over there.
         </p>
+      </div>
+
+      <div className="card">
+        <p className="section-label" style={{ marginBottom: 'var(--s-3)' }}>Dress Code at the Clubs</p>
+        <div className="stack-sm small">
+          <div>Collared or polo shirts — <span className="muted">no sleeveless, no collarless, no jerseys or slogans</span></div>
+          <div>Tailored shorts — <span className="muted">no cargo shorts, and knee-length or sports socks with them</span></div>
+          <div>Sweaters worn over a shirt — <span className="muted">no track or leisure suits</span></div>
+          <div>Bar and dining room are smart casual — <span className="muted">and take the hat off indoors</span></div>
+        </div>
       </div>
     </div>
   );
