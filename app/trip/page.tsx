@@ -21,6 +21,54 @@ function linkify(text: string) {
   });
 }
 
+const HOTELS = [
+  {
+    name: 'The Grafton Hotel · Dublin',
+    nights: 'Fri 11 & Sat 12 Sept — pre-trip nights',
+    address: '31–32 Stephen Street Lower, Dublin 2, D02 WV05',
+    phone: '+353 1 255 2700',
+    tel: '+35312552700',
+    email: 'reservations@thegrafton.ie',
+    note: 'Booked by David Harris · check-in 3:00pm',
+  },
+  {
+    name: 'Slieve Donard Resort & Spa',
+    nights: 'Sun 13 & Mon 14 Sept',
+    address: 'Downs Road, Newcastle, Co. Down, BT33 0AH',
+    phone: '+44 28 4372 1066',
+    tel: '+442843721066',
+    email: 'info@slievedonard.co.uk',
+    note: '6 standard Slieve twin rooms · breakfast included',
+  },
+  {
+    name: 'Golflinks Hotel Portrush',
+    nights: 'Tue 15 & Wed 16 Sept',
+    address: 'Bushmills Road, Portrush, Co. Antrim, BT56 8JQ',
+    phone: '+44 28 7082 6611',
+    tel: '+442870826611',
+    email: 'info@golflinkshotel.com',
+    note: '6 standard twin rooms · breakfast included · The White Pheasant is in-house',
+  },
+  {
+    name: 'Rosapenna Hotel & Golf Resort',
+    nights: 'Thu 17 & Fri 18 Sept',
+    address: 'Downings, Co. Donegal, F92 PN73',
+    phone: '+353 74 915 5301',
+    tel: '+353749155301',
+    email: 'reservations@rosapenna.ie',
+    note: 'Self-arranged through the hotel · settle your bill before Saturday golf',
+  },
+  {
+    name: 'Clayton Hotel Dublin Airport Central',
+    nights: 'Sat 19 Sept — last night',
+    address: 'Corballis, Dublin Airport, Co. Dublin, K67 H5H9',
+    phone: '+353 1 844 6000',
+    tel: '+35318446000',
+    email: 'reservations.dacentral@claytonhotels.com',
+    note: 'Formerly the Radisson Blu · complimentary shuttle to the terminal',
+  },
+];
+
 function groupByDate(items: ItineraryItem[]) {
   const map = new Map<string, ItineraryItem[]>();
   for (const item of items) {
@@ -106,14 +154,26 @@ export default async function TripPage() {
           </p>
         </div>
 
-        {/* Trip summary */}
+        {/* Hotels — nights, address, and how to reach the front desk */}
         <div className="card">
           <p className="section-label" style={{ marginBottom: 'var(--s-3)' }}>Hotels</p>
-          <div className="stack-sm">
-            <div className="row"><span style={{ fontSize: '1.1rem' }}>🏨</span><div><div style={{ fontWeight: 500 }}>Slieve Donard Resort</div><div className="small muted">Newcastle — Sun/Mon nights</div></div></div>
-            <div className="row"><span style={{ fontSize: '1.1rem' }}>🏨</span><div><div style={{ fontWeight: 500 }}>Golflinks Hotel Portrush</div><div className="small muted">Portrush — Tue/Wed nights</div></div></div>
-            <div className="row"><span style={{ fontSize: '1.1rem' }}>🏨</span><div><div style={{ fontWeight: 500 }}>Rosapenna (self-arranged)</div><div className="small muted">Donegal — Thu/Fri/Sat nights</div></div></div>
-            <div className="row"><span style={{ fontSize: '1.1rem' }}>🏨</span><div><div style={{ fontWeight: 500 }}>Radisson Blu Dublin Airport</div><div className="small muted">Sat night (last night)</div></div></div>
+          <div className="stack">
+            {HOTELS.map(hotel => (
+              <div key={hotel.name} className="row" style={{ alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '1.1rem', lineHeight: 1.4 }}>🏨</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600 }}>{hotel.name}</div>
+                  <div className="small muted">{hotel.nights}</div>
+                  <div className="small muted" style={{ marginTop: 2 }}>{hotel.address}</div>
+                  <div className="small" style={{ marginTop: 2 }}>
+                    <a href={`tel:${hotel.tel}`} style={{ color: 'var(--green)', fontWeight: 600 }}>{hotel.phone}</a>
+                    {' · '}
+                    <a href={`mailto:${hotel.email}`} style={{ color: 'var(--green)', overflowWrap: 'anywhere' }}>{hotel.email}</a>
+                  </div>
+                  {hotel.note && <div className="small muted" style={{ marginTop: 2 }}>{hotel.note}</div>}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -198,9 +258,8 @@ export default async function TripPage() {
         {/* Key Contacts */}
         <div className="card">
           <p className="section-label" style={{ marginBottom: 'var(--s-1)' }}>Key Contacts</p>
-          <p className="small muted" style={{ marginBottom: 'var(--s-3)' }}>Driver and Hidden Links are at the top of this page.</p>
+          <p className="small muted" style={{ marginBottom: 'var(--s-3)' }}>Driver and Hidden Links are at the top of this page; hotels are in the Hotels card.</p>
           <div className="stack-sm">
-            <div className="row"><span style={{ fontSize: '1rem' }}>🏨</span><div><div style={{ fontWeight: 500 }}>Rosapenna Hotel</div><div className="small muted">reservations@rosapenna.ie · +353 74 91 55301</div></div></div>
             <div className="row"><span style={{ fontSize: '1rem' }}>⛳</span><div><div style={{ fontWeight: 500 }}>Royal County Down</div><div className="small muted">+44 28 4372 3314</div></div></div>
             <div className="row"><span style={{ fontSize: '1rem' }}>⛳</span><div><div style={{ fontWeight: 500 }}>Portstewart Golf Club</div><div className="small muted">+44 28 7083 2015</div></div></div>
             <div className="row"><span style={{ fontSize: '1rem' }}>🍺</span><div><div style={{ fontWeight: 500 }}>Guinness Storehouse</div><div className="small muted">+353 1 408 4800 · Ref 904474457 · <Link href="/tickets/guinness" style={{ color: 'var(--green)', fontWeight: 600 }}>tickets</Link></div></div></div>
