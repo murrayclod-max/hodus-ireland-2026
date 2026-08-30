@@ -5,6 +5,7 @@ import { Plane, Plus, Pencil, X, Check } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import type { Flight, Player } from '@/lib/types';
+import { formatDublin, formatInZone, zoneForAirport, toZoneInput, fromZoneInput } from '@/lib/utils';
 
 interface Props {
   flights: (Flight & { players: Player })[];
@@ -15,10 +16,13 @@ interface Props {
 
 function formatArrival(iso: string | null): string {
   if (!iso) return '—';
-  return new Date(iso).toLocaleString('en-US', {
-    weekday: 'short', month: 'short', day: 'numeric',
-    hour: 'numeric', minute: '2-digit',
-  });
+  return formatDublin(iso);
+}
+
+// Outbound lands in Ireland, the return leg lands at home — show each in the
+// zone of the airport it actually touches down at.
+function formatArrivalAt(iso: string, toCode: string | null): string {
+  return formatInZone(iso, zoneForAirport(toCode));
 }
 
 function ArrivalSummary({ outFlights }: { outFlights: (Flight & { players: Player })[] }) {
@@ -33,7 +37,8 @@ function ArrivalSummary({ outFlights }: { outFlights: (Flight & { players: Playe
 
   return (
     <div className="card" style={{ background: 'rgba(201,162,75,.08)', borderColor: 'var(--gilt)' }}>
-      <p className="section-label" style={{ marginBottom: 'var(--s-3)' }}>Arrival Window</p>
+      <p className="section-label" style={{ marginBottom: 'var(--s-1)' }}>Arrival Window</p>
+      <p className="small muted" style={{ marginBottom: 'var(--s-3)' }}>All times Irish (IST)</p>
       <div className="stack-sm">
         <div className="row-between">
           <span className="small muted">First in</span>
@@ -64,7 +69,13 @@ function FlightRow({ flight, canEdit, onEdit }: { flight: Flight & { players: Pl
             <div className="small muted">
               {flight.airline} {flight.flight_no} · {flight.from_code} → {flight.to_code}
             </div>
-            {flight.arrive_at && <div className="small muted">Arrives {formatArrival(flight.arrive_at)}</div>}
+            {flight.depart_at && <div className="small muted">Departs {formatArrivalAt(flight.depart_at, flight.from_code)}</div>}
+            {flight.arrive_at && <div className="small muted">Arrives {formatArrivalAt(flight.arrive_at, flight.to_code)}</div>}
+            {flight.stops && (
+              <div className="small muted">
+                {/^non-?stop$/i.test(flight.stops.trim()) ? 'Nonstop' : `Via ${flight.stops}`}
+              </div>
+            )}
             {flight.notes && <div className="small muted italic">{flight.notes}</div>}
           </div>
         </div>
@@ -91,7 +102,9 @@ function FlightForm({ flight, players, myPlayerId, isAdmin, onClose }: {
   const [flightNo, setFlightNo] = useState(flight?.flight_no ?? '');
   const [from, setFrom] = useState(flight?.from_code ?? '');
   const [to, setTo] = useState(flight?.to_code ?? '');
-  const [arriveAt, setArriveAt] = useState(flight?.arrive_at ? new Date(flight.arrive_at).toISOString().slice(0,16) : '');
+  const [departAt, setDepartAt] = useState(flight?.depart_at ? toZoneInput(flight.depart_at, zoneForAirport(flight.from_code)) : '');
+  const [arriveAt, setArriveAt] = useState(flight?.arrive_at ? toZoneInput(flight.arrive_at, zoneForAirport(flight.to_code)) : '');
+  const [stops, setStops] = useState(flight?.stops ?? '');
   const [notes, setNotes] = useState(flight?.notes ?? '');
   const [saving, setSaving] = useState(false);
 
@@ -105,7 +118,9 @@ function FlightForm({ flight, players, myPlayerId, isAdmin, onClose }: {
       flight_no: flightNo || null,
       from_code: from || null,
       to_code: to || null,
-      arrive_at: arriveAt ? new Date(arriveAt).toISOString() : null,
+      depart_at: departAt ? fromZoneInput(departAt, zoneForAirport(from)) : null,
+      arrive_at: arriveAt ? fromZoneInput(arriveAt, zoneForAirport(to)) : null,
+      stops: stops || null,
       notes: notes || null,
     };
     if (flight?.id) {
@@ -150,8 +165,14 @@ function FlightForm({ flight, players, myPlayerId, isAdmin, onClose }: {
             <label className="field">From<input className="input" value={from} onChange={e => setFrom(e.target.value)} placeholder="JFK" /></label>
             <label className="field">To<input className="input" value={to} onChange={e => setTo(e.target.value)} placeholder="DUB" /></label>
           </div>
-          <label className="field">Arrival (local time)
+          <label className="field">Departure — local time at {from ? from.toUpperCase() : 'origin'}
+            <input className="input" type="datetime-local" value={departAt} onChange={e => setDepartAt(e.target.value)} />
+          </label>
+          <label className="field">Arrival — local time at {to ? to.toUpperCase() : 'destination'}
             <input className="input" type="datetime-local" value={arriveAt} onChange={e => setArriveAt(e.target.value)} />
+          </label>
+          <label className="field">Stops
+            <input className="input" value={stops} onChange={e => setStops(e.target.value)} placeholder="Nonstop, or e.g. via JFK — 2h 10m" />
           </label>
           <label className="field">Notes<input className="input" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Terminal 1, bag claim C…" /></label>
           <button className="btn btn-primary" onClick={save} disabled={saving || !playerId}>

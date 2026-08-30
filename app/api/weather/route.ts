@@ -119,6 +119,7 @@ export interface WeatherHour {
 
 export interface WeatherResponse {
   source: 'forecast' | 'historical';
+  window: 'day' | 'round';
   date: string;
   highF: number;
   lowF: number;
@@ -138,13 +139,21 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'missing params' }, { status: 400 });
   }
 
-  // Day mode: 6-hourly intervals (0, 6, 12, 18) for full-day view
-  const isDayMode = mode === 'day';
-  const teeH = isDayMode ? -1 : parseTeeHour(teeTime);
-  const teeM = isDayMode ? 0 : parseTeeMinute(teeTime);
-  const startH = isDayMode ? 0 : Math.max(0, teeH - 1);
-  const endH = isDayMode ? 23 : Math.min(23, teeH + 6);
+  // 'day'  → 6-hourly intervals (0, 6, 12, 18) across the whole day
+  // 'auto' → hour by hour through the round once there's a real forecast to
+  //          report, 6-hourly while we're still on September averages
+  const hasTee = searchParams.has('teeTime');
+  const forecastDayMode = mode === 'day' || (mode === 'auto' && !hasTee);
+  const historicalDayMode = mode === 'day' || mode === 'auto';
+  const teeH = parseTeeHour(teeTime);
+  const teeM = parseTeeMinute(teeTime);
   const SIX_HOURLY = [0, 6, 12, 18];
+
+  // An hour before the tee, five hours of golf, an hour after you walk off
+  const windowFor = (dayMode: boolean) => ({
+    startH: dayMode ? 0 : Math.max(0, teeH - 1),
+    endH: dayMode ? 23 : Math.min(23, teeH + 6),
+  });
 
   // Check if date is within Open-Meteo's 16-day forecast window
   const today = new Date();
@@ -154,6 +163,8 @@ export async function GET(req: NextRequest) {
 
   if (daysAhead >= 0 && daysAhead <= 16) {
     // ── Live forecast from Open-Meteo ──────────────────────────────────────
+    const isDayMode = forecastDayMode;
+    const { startH, endH } = windowFor(isDayMode);
     try {
       const params = new URLSearchParams({
         latitude: String(coords.lat),
@@ -186,10 +197,17 @@ export async function GET(req: NextRequest) {
       const hours: WeatherHour[] = [];
       const windowTemps: number[] = [];
 
+      // Open-Meteo answers for any date in range but pads hours past its real
+      // horizon with nulls. Count what we asked for so we can tell a genuine
+      // forecast from a half-empty one.
+      let wanted = 0;
+
       for (let i = 0; i < hourly.time.length; i++) {
         const h = parseInt(hourly.time[i].split('T')[1].split(':')[0]);
         if (h < startH || h > endH) continue;
         if (isDayMode && !SIX_HOURLY.includes(h)) continue;
+        wanted++;
+        if (hourly.temperature_2m[i] == null) continue;
 
         const code = hourly.weathercode[i];
         const dispH = isDayMode ? fmtHour(h, 0) :
@@ -210,8 +228,12 @@ export async function GET(req: NextRequest) {
         windowTemps.push(hourly.temperature_2m[i]);
       }
 
+      // Partial coverage isn't a real report — fall back to the averages
+      if (!hours.length || hours.length < wanted) throw new Error('forecast does not cover the window');
+
       return NextResponse.json({
         source: 'forecast',
+        window: isDayMode ? 'day' : 'round',
         date,
         highF: Math.round(Math.max(...windowTemps)),
         lowF: Math.round(Math.min(...windowTemps)),
@@ -224,6 +246,8 @@ export async function GET(req: NextRequest) {
   }
 
   // ── Historical averages ────────────────────────────────────────────────
+  const isDayMode = historicalDayMode;
+  const { startH, endH } = windowFor(isDayMode);
   const region = REGION[slug] ?? 'ni';
   const hist = HIST[region];
   const hours: WeatherHour[] = [];
@@ -255,6 +279,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     source: 'historical',
+    window: isDayMode ? 'day' : 'round',
     date,
     highF: Math.max(...windowTemps),
     lowF: Math.min(...windowTemps),

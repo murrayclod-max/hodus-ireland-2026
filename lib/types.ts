@@ -131,6 +131,7 @@ export interface Flight {
   to_code: string | null;
   depart_at: string | null;
   arrive_at: string | null;
+  stops: string | null;
   notes: string | null;
   players?: Player;
 }

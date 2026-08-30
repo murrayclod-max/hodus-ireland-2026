@@ -1,7 +1,7 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { formatDate, kindIcon } from '@/lib/utils';
+import { formatDate, kindIcon, mapsHref } from '@/lib/utils';
 import type { ItineraryItem, Player } from '@/lib/types';
 import EditItineraryItem from './EditItineraryItem';
 
@@ -67,6 +67,18 @@ const HOTELS = [
     email: 'reservations.dacentral@claytonhotels.com',
     note: 'Formerly the Radisson Blu · complimentary shuttle to the terminal',
   },
+];
+
+const CONTACTS: {
+  icon: string; name: string; mapQuery: string; phone: string; tel: string; extra?: React.ReactNode;
+}[] = [
+  { icon: '⛳', name: 'Royal County Down', mapQuery: 'Royal County Down Golf Club, Newcastle, Co. Down', phone: '+44 28 4372 3314', tel: '+442843723314' },
+  { icon: '⛳', name: 'Portstewart Golf Club', mapQuery: 'Portstewart Golf Club, Portstewart, Co. Londonderry', phone: '+44 28 7083 2015', tel: '+442870832015' },
+  { icon: '🍺', name: 'Guinness Storehouse', mapQuery: "Guinness Storehouse, St James's Gate, Dublin 8", phone: '+353 1 408 4800', tel: '+35314084800',
+    extra: <> · Ref 904474457 · <Link href="/tickets/guinness" style={{ color: 'var(--green)', fontWeight: 600 }}>tickets</Link></> },
+  { icon: '🍽', name: 'The Olde Glen, Carrickart', mapQuery: 'The Olde Glen Bar and Restaurant, Carrigart, Co. Donegal', phone: '+353 83 158 5777', tel: '+353831585777' },
+  { icon: '🍽', name: 'Villa Vinci, Newcastle', mapQuery: 'Villa Vinci, 31 Main Street, Newcastle, Co. Down', phone: '+44 28 4372 3080', tel: '+442843723080' },
+  { icon: '🍽', name: 'The White Pheasant, Portrush', mapQuery: 'The White Pheasant, Bushmills Road, Portrush', phone: '+44 28 7082 6611', tel: '+442870826611' },
 ];
 
 function groupByDate(items: ItineraryItem[]) {
@@ -164,7 +176,11 @@ export default async function TripPage() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 600 }}>{hotel.name}</div>
                   <div className="small muted">{hotel.nights}</div>
-                  <div className="small muted" style={{ marginTop: 2 }}>{hotel.address}</div>
+                  <a
+                    className="small"
+                    href={mapsHref(`${hotel.name}, ${hotel.address}`)}
+                    style={{ display: 'block', marginTop: 2, color: 'var(--green)' }}
+                  >{hotel.address} ↗</a>
                   <div className="small" style={{ marginTop: 2 }}>
                     <a href={`tel:${hotel.tel}`} style={{ color: 'var(--green)', fontWeight: 600 }}>{hotel.phone}</a>
                     {' · '}
@@ -270,12 +286,18 @@ export default async function TripPage() {
           <p className="section-label" style={{ marginBottom: 'var(--s-1)' }}>Key Contacts</p>
           <p className="small muted" style={{ marginBottom: 'var(--s-3)' }}>Driver and Hidden Links are at the top of this page; hotels are in the Hotels card.</p>
           <div className="stack-sm">
-            <div className="row"><span style={{ fontSize: '1rem' }}>⛳</span><div><div style={{ fontWeight: 500 }}>Royal County Down</div><div className="small muted">+44 28 4372 3314</div></div></div>
-            <div className="row"><span style={{ fontSize: '1rem' }}>⛳</span><div><div style={{ fontWeight: 500 }}>Portstewart Golf Club</div><div className="small muted">+44 28 7083 2015</div></div></div>
-            <div className="row"><span style={{ fontSize: '1rem' }}>🍺</span><div><div style={{ fontWeight: 500 }}>Guinness Storehouse</div><div className="small muted">+353 1 408 4800 · Ref 904474457 · <Link href="/tickets/guinness" style={{ color: 'var(--green)', fontWeight: 600 }}>tickets</Link></div></div></div>
-            <div className="row"><span style={{ fontSize: '1rem' }}>🍽</span><div><div style={{ fontWeight: 500 }}>The Olde Glen, Carrickart</div><div className="small muted">+353 83 158 5777</div></div></div>
-            <div className="row"><span style={{ fontSize: '1rem' }}>🍽</span><div><div style={{ fontWeight: 500 }}>Villa Vinci, Newcastle</div><div className="small muted">+44 28 4372 3080</div></div></div>
-            <div className="row"><span style={{ fontSize: '1rem' }}>🍽</span><div><div style={{ fontWeight: 500 }}>The White Pheasant, Portrush</div><div className="small muted">+44 28 7082 6611</div></div></div>
+            {CONTACTS.map(c => (
+              <div key={c.name} className="row" style={{ alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '1rem', lineHeight: 1.4 }}>{c.icon}</span>
+                <div>
+                  <a href={mapsHref(c.mapQuery)} style={{ fontWeight: 600, color: 'var(--ink)' }}>{c.name} ↗</a>
+                  <div className="small muted">
+                    <a href={`tel:${c.tel}`} style={{ color: 'var(--green)', fontWeight: 600 }}>{c.phone}</a>
+                    {c.extra}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

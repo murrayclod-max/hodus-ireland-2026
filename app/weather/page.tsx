@@ -78,6 +78,7 @@ export default async function WeatherPage() {
       slug,
       locationName: COURSE_NAMES[slug] ?? slug,
       roundLabel,
+      teeTime: round?.tee_time,
     };
   });
 
@@ -86,14 +87,14 @@ export default async function WeatherPage() {
       <div className="page-header">
         <div className="wrap">
           <h1>⛅ Weather</h1>
-          <p className="sub">Sep 12–21 · 6-hourly forecast</p>
+          <p className="sub">Sep 12–21 · hour by hour through each round</p>
         </div>
       </div>
 
       <div className="wrap stack-sm" style={{ paddingTop: 'var(--s-5)', paddingBottom: 'var(--s-6)' }}>
         <div className="card" style={{ background: 'rgba(201,162,75,0.07)', borderColor: 'var(--gilt)', padding: 'var(--s-3) var(--s-4)' }}>
           <p className="small" style={{ color: '#7a5c10' }}>
-            📊 Showing historical September averages — live forecasts from Open-Meteo will replace these within 14 days of each date.
+            📊 September averages for now, 6-hourly. Once a date comes inside Open-Meteo&rsquo;s 16-day window it switches to a real forecast, hour by hour from an hour before the tee to an hour after you walk off.
           </p>
         </div>
 

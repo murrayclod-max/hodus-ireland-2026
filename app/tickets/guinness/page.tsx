@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { mapsHref } from '@/lib/utils';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -50,7 +51,9 @@ export default async function GuinnessTicketsPage() {
           </div>
           <p className="small muted" style={{ marginTop: 'var(--s-3)' }}>
             Arrive inside your 15-minute slot or the booking rolls to the next available time. Tickets are non-refundable.
-            Storehouse: +353 1 408 4800 · info@guinnessstorehouse.com
+            Storehouse: <a href="tel:+35314084800" style={{ color: 'var(--green)', fontWeight: 600 }}>+353 1 408 4800</a>
+            {' · '}
+            <a href={mapsHref("Guinness Storehouse, St James's Gate, Dublin 8")} style={{ color: 'var(--green)' }}>St James&rsquo;s Gate, Dublin 8 ↗</a>
           </p>
         </div>
 

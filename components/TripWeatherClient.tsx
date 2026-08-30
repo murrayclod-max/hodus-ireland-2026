@@ -9,6 +9,7 @@ interface DaySlot {
   slug: string;       // course slug for location
   locationName: string;
   roundLabel?: string; // e.g. "Round 1 — Royal County Down"
+  teeTime?: string;    // e.g. "9:22 AM" — drives the hourly round window
 }
 
 interface Props {
@@ -29,12 +30,13 @@ function DayWeather({ day }: { day: DaySlot }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const params = new URLSearchParams({ slug: day.slug, date: day.date, mode: 'day' });
+    const params = new URLSearchParams({ slug: day.slug, date: day.date, mode: 'auto' });
+    if (day.teeTime) params.set('teeTime', day.teeTime);
     fetch(`/api/weather?${params}`)
       .then(r => r.json())
       .then(setData)
       .finally(() => setLoading(false));
-  }, [day.slug, day.date]);
+  }, [day.slug, day.date, day.teeTime]);
 
   return (
     <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -86,6 +88,17 @@ function DayWeather({ day }: { day: DaySlot }) {
               display: 'flex', alignItems: 'center', gap: 4,
             }}>
               <span>📊</span> Historical September averages
+            </div>
+          )}
+          {data.source === 'forecast' && data.window === 'round' && (
+            <div style={{
+              padding: '5px 14px',
+              background: 'rgba(14,59,46,0.06)',
+              borderBottom: '1px solid rgba(14,59,46,0.14)',
+              fontSize: '0.68rem', color: 'var(--green)', fontWeight: 600,
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}>
+              <span>⛳</span> Live forecast — hourly, an hour either side of the round
             </div>
           )}
           <div style={{ overflowX: 'auto' }}>
