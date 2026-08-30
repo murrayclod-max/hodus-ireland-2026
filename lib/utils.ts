@@ -46,12 +46,28 @@ export function zoneForAirport(code: string | null | undefined): string {
   return AIRPORT_TZ[code.trim().toUpperCase()] ?? TRIP_TZ;
 }
 
+// No single locale abbreviates every zone well — en-US gives PDT but "GMT+1"
+// for Dublin, en-IE gives IST. Pick the locale that names each zone properly.
+const ZONE_LOCALE: Record<string, string> = {
+  'Europe/Dublin': 'en-IE',
+  'Europe/London': 'en-GB',
+  'Europe/Rome': 'en-GB',
+};
+
+function zoneAbbrev(at: Date, timeZone: string): string {
+  const locale = ZONE_LOCALE[timeZone] ?? 'en-US';
+  const parts = new Intl.DateTimeFormat(locale, { timeZone, timeZoneName: 'short' }).formatToParts(at);
+  return parts.find(p => p.type === 'timeZoneName')?.value ?? '';
+}
+
 export function formatInZone(isoStr: string, timeZone: string): string {
-  return new Date(isoStr).toLocaleString('en-US', {
+  const at = new Date(isoStr);
+  const stamp = at.toLocaleString('en-US', {
     timeZone,
     weekday: 'short', month: 'short', day: 'numeric',
-    hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
+    hour: 'numeric', minute: '2-digit',
   });
+  return `${stamp} ${zoneAbbrev(at, timeZone)}`.trim();
 }
 
 // "2026-09-11T11:45" as the given zone sees it — for datetime-local inputs
