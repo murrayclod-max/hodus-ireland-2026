@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { formatDate } from '@/lib/utils';
 import type { Round, Course, Match } from '@/lib/types';
 import Countdown from '@/components/Countdown';
+import FieldGuideChip from '@/components/FieldGuideChip';
 
 export const revalidate = 60;
 
@@ -98,7 +99,7 @@ export default async function HomePage() {
                 <Image src={nextRound.courses.crest_url} alt="" width={48} height={48} style={{ borderRadius: '50%' }} />
               )}
               <div>
-                <div style={{ fontWeight: 600, fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}>{nextRound.courses?.name}</div>
+                <div style={{ fontWeight: 600, fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}>{nextRound.courses?.name} <FieldGuideChip slug={nextRound.courses?.slug} /></div>
                 <div className="small muted">{formatDate(nextRound.play_date)} · {nextRound.tee_time}</div>
                 {nextRound.is_altshot && <span className="chip chip-gilt" style={{ marginTop: 4 }}>Alt Shot</span>}
               </div>

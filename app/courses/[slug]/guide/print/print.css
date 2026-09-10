@@ -1,0 +1,103 @@
+/* Quarter-sheet field guide. Four panels of 4.25 x 5.5in to a letter page. */
+
+.printroot { background: #fff; color: #23241F; }
+
+.sheet {
+  width: 8.5in;
+  height: 11in;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 4.25in 4.25in;
+  grid-template-rows: 5.5in 5.5in;
+  background: #fff;
+}
+
+.panel {
+  width: 4.25in;
+  height: 5.5in;
+  padding: 0.26in 0.24in;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px dashed #d8d3c5;
+  border-bottom: 1px dashed #d8d3c5;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 7.4pt;
+  line-height: 1.34;
+}
+
+/* ── Hole panels ─────────────────────────────────────────────── */
+.phead { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid #23241F; padding-bottom: 3px; margin-bottom: 5px; }
+.pnum { font-family: var(--font-display), Georgia, serif; font-weight: 700; font-size: 21pt; line-height: 0.85; color: #0E3B2E; }
+.pmeta { font-weight: 700; font-size: 6.6pt; letter-spacing: 0.05em; }
+.ptags { margin-left: auto; display: flex; gap: 3px; }
+.ptag { font-size: 5.2pt; font-weight: 700; letter-spacing: 0.05em; border: 0.5pt solid #0E3B2E; color: #0E3B2E; border-radius: 2px; padding: 1px 3px; white-space: nowrap; }
+.ptag-joe { background: #0E3B2E; color: #fff; }
+
+.pbody { display: flex; gap: 7px; flex: 1; min-height: 0; }
+.pmap { width: 1.28in; height: auto; align-self: flex-start; border: 0.5pt solid #d8d3c5; border-radius: 2px; }
+.ptext { flex: 1; min-width: 0; }
+.ptext p { margin: 0 0 3.5px; }
+.plabel { font-weight: 700; color: #0E3B2E; font-size: 6.4pt; letter-spacing: 0.04em; }
+.plabel-joe { color: #8a6a1f; }
+.joe { font-weight: 600; }
+
+.pfoot { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; font-size: 5.4pt; color: #6E6E64; border-top: 0.5pt solid #d8d3c5; padding-top: 3px; margin-top: 4px; }
+.wind { white-space: nowrap; letter-spacing: 0.08em; }
+
+/* ── Text panels ─────────────────────────────────────────────── */
+.ph2 { font-family: var(--font-display), Georgia, serif; font-size: 13pt; color: #0E3B2E; margin: 0 0 2px; }
+.pintro { font-size: 6.4pt; color: #6E6E64; margin: 0 0 7px; }
+.prules p { margin: 0 0 5px; }
+.rt { font-weight: 700; color: #0E3B2E; }
+
+.pcard { width: 100%; border-collapse: collapse; font-size: 6.4pt; }
+.pcard th { text-align: left; font-size: 5.4pt; letter-spacing: 0.08em; color: #6E6E64; border-bottom: 0.5pt solid #23241F; padding: 2px 3px; }
+.pcard td { padding: 1.6px 3px; border-bottom: 0.25pt solid #EAE5D6; }
+.pcard td:nth-child(-n+4) { text-align: right; width: 0.3in; font-variant-numeric: tabular-nums; }
+.pcard td:first-child { text-align: left; font-weight: 700; }
+.pcard tr.sum td { font-weight: 700; background: #f3f0e6; }
+
+.pmatch { width: 100%; border-collapse: collapse; font-size: 6.4pt; margin: 5px 0; }
+.pmatch th { text-align: left; font-size: 5.4pt; letter-spacing: 0.08em; color: #6E6E64; border-bottom: 0.5pt solid #23241F; padding: 2px 3px; }
+.pmatch td { height: 0.26in; border-bottom: 0.25pt solid #d8d3c5; padding: 2px 3px; }
+.pmatch td:first-child { font-weight: 700; width: 0.35in; }
+.mfield { display: flex; align-items: flex-end; gap: 6px; margin-bottom: 6px; }
+.mfield span { font-size: 5.6pt; font-weight: 700; letter-spacing: 0.08em; color: #6E6E64; width: 0.62in; }
+.mfield i { flex: 1; border-bottom: 0.5pt solid #d8d3c5; height: 0.16in; }
+
+/* ── Cover and back ──────────────────────────────────────────── */
+.panel-cover { text-align: center; align-items: center; }
+.ceyebrow { font-size: 5.8pt; font-weight: 700; letter-spacing: 0.12em; color: #6E6E64; }
+.ctitle { font-family: var(--font-display), Georgia, serif; font-size: 21pt; line-height: 1.02; color: #0E3B2E; margin: 4px 0 2px; font-weight: 700; }
+.ctitle span { display: block; }
+.csub { font-size: 6.6pt; color: #6E6E64; margin-bottom: 6px; }
+.ccover { max-width: 2.5in; max-height: 1.75in; object-fit: contain; border: 0.5pt solid #d8d3c5; }
+.cfg { font-family: var(--font-display), Georgia, serif; font-size: 13pt; color: #0E3B2E; margin-top: 7px; }
+.cspec { font-size: 7pt; margin-top: 2px; }
+.carch { font-size: 5.8pt; color: #6E6E64; margin-top: 3px; }
+.cstrap { font-size: 5.8pt; color: #6E6E64; margin-top: auto; font-style: italic; }
+
+.panel-back { text-align: center; justify-content: center; align-items: center; border: 1pt solid #0E3B2E; }
+.bmax { font-family: var(--font-display), Georgia, serif; font-size: 15pt; color: #0E3B2E; line-height: 1.24; font-weight: 700; }
+.bmax span { display: block; }
+.bsub { font-size: 6.6pt; color: #23241F; margin-top: 9px; max-width: 2.6in; }
+.bfoot { margin-top: auto; font-size: 5.6pt; font-weight: 700; letter-spacing: 0.08em; color: #6E6E64; }
+.bcourses { font-weight: 400; letter-spacing: 0; margin-top: 2px; }
+
+/* ── Screen preview vs paper ─────────────────────────────────── */
+@media screen {
+  .sheet { box-shadow: 0 2px 14px rgba(0,0,0,.14); margin: 16px auto; }
+  .printroot { padding-bottom: 80px; }
+}
+
+@media print {
+  @page { size: letter portrait; margin: 0; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  .noprint, .tab-bar { display: none !important; }
+  .sheet { margin: 0; box-shadow: none; break-after: page; page-break-after: always; }
+  .sheet:last-child { break-after: auto; page-break-after: auto; }
+  .panel { break-inside: avoid; page-break-inside: avoid; }
+  .printroot { padding-bottom: 0; }
+}

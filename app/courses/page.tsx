@@ -2,6 +2,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Course } from '@/lib/types';
+import FieldGuideChip from '@/components/FieldGuideChip';
 
 export const revalidate = 3600;
 
@@ -107,6 +108,7 @@ export default async function CoursesPage() {
                 }}>
                   {course.name}
                 </div>
+                <div style={{ marginTop: 5 }}><FieldGuideChip slug={course.slug} /></div>
                 <div className="small muted" style={{ marginTop: 3 }}>
                   {[course.location, course.designer, course.founded && `Est. ${course.founded}`].filter(Boolean).join(' · ')}
                 </div>

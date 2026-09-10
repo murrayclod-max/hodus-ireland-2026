@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { formatDate, kindIcon, mapsHref } from '@/lib/utils';
 import type { ItineraryItem, Player } from '@/lib/types';
 import EditItineraryItem from './EditItineraryItem';
+import FieldGuideChip from '@/components/FieldGuideChip';
 
 export const revalidate = 60;
 
@@ -230,7 +231,10 @@ export default async function TripPage() {
                               : kindIcon(item.kind)
                         }</span>
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 600 }}>{item.title}</div>
+                          <div style={{ fontWeight: 600 }}>
+                            {item.title}{' '}
+                            {item.kind === 'golf' && <FieldGuideChip courseName={item.title} />}
+                          </div>
                           {item.detail && <p className="small muted" style={{ marginTop: 2 }}>{linkify(item.detail)}</p>}
                         </div>
                       </div>

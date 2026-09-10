@@ -4,6 +4,7 @@ import type { Course, Round, SignatureHole } from '@/lib/types';
 import CourseEditPanel from './CourseEditPanel';
 import CourseWeather from '@/components/CourseWeather';
 import { roundLabel } from '@/lib/utils';
+import FieldGuideChip from '@/components/FieldGuideChip';
 
 export const revalidate = 3600;
 
@@ -117,6 +118,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
       <div className="wrap stack-lg" style={{ paddingTop: 'var(--s-5)', paddingBottom: 'var(--s-6)' }}>
 
         {/* Description */}
+        <FieldGuideChip slug={course.slug} size="md" />
+
         {course.description && (
           <div className="card" style={{ borderLeft: `4px solid ${course.rail_color}` }}>
             <p style={{ fontSize: '0.95rem', lineHeight: 1.65, color: 'var(--ink)' }}>{course.description}</p>
