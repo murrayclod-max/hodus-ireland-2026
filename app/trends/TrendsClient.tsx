@@ -291,10 +291,15 @@ function TeamLegend({ players }: { players: PlayerData[] }) {
 type RecentRound = {
   playerName: string;
   datePlayed: string;
+  monthOnly?: boolean;   // GHIN only gave the month — don't show a day
   courseName: string;
   grossScore: number;
   indexDelta: number | null;
 };
+
+function formatRoundMonth(s: string): string {
+  return new Date(s.slice(0, 7) + '-15T00:00:00').toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+}
 
 function formatRoundDate(d: string): string {
   const [, m, day] = d.split('-');
@@ -505,7 +510,7 @@ export default function TrendsClient({ players, recentRounds = [], isAdmin = fal
                       </span>
                     )}
                     <span style={{ color: 'var(--mute)', fontSize: '0.75rem', minWidth: 44, textAlign: 'right' }}>
-                      {formatRoundDate(r.datePlayed)}
+                      {r.monthOnly ? formatRoundMonth(r.datePlayed) : formatRoundDate(r.datePlayed)}
                     </span>
                   </div>
                 </div>

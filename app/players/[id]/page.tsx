@@ -35,7 +35,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
   // Recent GHIN rounds
   const { data: recentRounds } = await db
     .from('ghin_recent_rounds')
-    .select('date_played, course_name, course_rating, slope_rating, gross_score, adjusted_gross_score, differential')
+    .select('date_played, course_name, course_rating, slope_rating, gross_score, adjusted_gross_score, differential, raw')
     .eq('player_id', id)
     .order('date_played', { ascending: false })
     .limit(20);

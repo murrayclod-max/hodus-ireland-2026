@@ -26,7 +26,7 @@ export default async function TrendsPage() {
 
   const { data: recentRoundsRaw } = await db
     .from('ghin_recent_rounds')
-    .select('player_id, date_played, course_name, gross_score, differential')
+    .select('player_id, date_played, course_name, gross_score, differential, raw')
     .order('date_played', { ascending: false });
 
   const historyByPlayer: Record<string, Array<{ date: string; value: number }>> = {};
@@ -63,6 +63,7 @@ export default async function TrendsPage() {
       return {
         playerName: playerNameMap[r!.player_id] ?? 'Unknown',
         datePlayed: r!.date_played as string,
+        monthOnly: /^\d{4}-\d{2}$/.test(String((r!.raw as { played_at?: unknown } | null)?.played_at ?? '')),
         courseName: r!.course_name as string,
         grossScore: r!.gross_score as number,
         indexDelta,

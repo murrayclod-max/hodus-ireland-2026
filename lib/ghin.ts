@@ -130,6 +130,7 @@ export async function fetchRecentGhinRounds(
   token: string,
   ghinNumber: string,
   count = 20,
+  opts: { homeCourse?: string | null } = {},
 ): Promise<{ rounds: GhinRecentRound[]; rawResponse: unknown }> {
   // No status filter — return whatever the API gives us most recently.
   // The GHIN scores API field names vary; we normalise below.
@@ -180,12 +181,31 @@ export async function fetchRecentGhinRounds(
     return Number.isFinite(n) ? n : null;
   };
 
+  // Some golfers' scoring records come back privacy-reduced: every score has
+  // a month-only played_at ("2026-09") and no course fields at all. Give those
+  // rows a synthetic day — counting down from the 28th within the month, in
+  // the order GHIN lists them — so they sort correctly and stay unique in the
+  // (player, date, course) key, and label the course from the score type.
+  // The raw row keeps the real played_at so the UI can show just the month.
+  const SCORE_TYPE_LABEL: Record<string, string> = {
+    H: opts.homeCourse || 'Home course', A: 'Away', T: 'Tournament', C: 'Combined 9s', P: 'Penalty',
+  };
+  const monthCounter = new Map<string, number>();
+
   const results: GhinRecentRound[] = [];
   for (const row of rows) {
     // Handle multiple known date field names across GHIN associations
     const rawDate = String(row.played_at ?? row.score_date ?? row.played_date ?? row.date_played ?? '');
-    const datePlayed = rawDate.slice(0, 10);
-    const courseName = String(row.course_name ?? row.facility_name ?? row.course ?? '');
+    let datePlayed = rawDate.slice(0, 10);
+    if (/^\d{4}-\d{2}$/.test(rawDate)) {
+      const seen = monthCounter.get(rawDate) ?? 0;
+      monthCounter.set(rawDate, seen + 1);
+      datePlayed = `${rawDate}-${String(Math.max(1, 28 - seen)).padStart(2, '0')}`;
+    }
+    const courseName = String(
+      row.course_name ?? row.facility_name ?? row.ghin_course_name_display ?? row.course
+      ?? SCORE_TYPE_LABEL[String(row.score_type ?? '')] ?? 'Course not listed',
+    );
     const courseRating = parseNum(row.course_rating ?? row.cr);
     const slopeRating  = parseNum(row.slope_rating ?? row.slope ?? row.sr);
     // adjusted_gross_score or gross_score or score (value may include type letter)

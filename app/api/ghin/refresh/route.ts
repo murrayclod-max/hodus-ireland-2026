@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     // Fetch all players that have a GHIN number
     const { data: players } = await supabase
       .from('players')
-      .select('id, name, ghin')
+      .select('id, name, ghin, home_club')
       .not('ghin', 'is', null)
       .not('ghin', 'eq', 'TBD');
 
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Fetch recent rounds
-      const { rounds: recentRounds } = await fetchRecentGhinRounds(token, player.ghin!, 20)
+      const { rounds: recentRounds } = await fetchRecentGhinRounds(token, player.ghin!, 20, { homeCourse: player.home_club })
         .catch((e) => {
           errors.push(`${player.name} rounds: ${(e as Error).message}`);
           return { rounds: [], rawResponse: null };

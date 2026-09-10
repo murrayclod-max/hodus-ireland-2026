@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 type GhinRoundRow = {
   date_played: string;
+  raw?: { played_at?: string } | null;
   course_name: string;
   course_rating: number;
   slope_rating: number;
@@ -40,7 +41,7 @@ export default function GhinRecentRounds({ rounds }: { rounds: GhinRoundRow[] })
           <tbody>
             {visible.map(r => (
               <tr key={`${r.date_played}-${r.course_name}`}>
-                <td style={{ whiteSpace: 'nowrap' }}>{fmt(r.date_played)}</td>
+                <td style={{ whiteSpace: 'nowrap' }}>{/^\d{4}-\d{2}$/.test(r.raw?.played_at ?? '') ? new Date(r.date_played.slice(0, 7) + '-15T00:00:00').toLocaleDateString('en-US', { month: 'short' }) : fmt(r.date_played)}</td>
                 <td>{r.course_name}</td>
                 <td className="num muted">{r.course_rating.toFixed(1)} / {r.slope_rating}</td>
                 <td className="num">{r.gross_score}</td>
