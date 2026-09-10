@@ -31,6 +31,9 @@ export interface CourseGuide {
   architects: string;
   strapline: string;
   cover: string;
+  photos?: boolean;       // false until the aerials are in — placeholders print in their place
+  scale?: boolean;        // yardage scale down the left of each aerial, tee at the bottom
+  groupsRound?: number;   // print that round's tee-time groups instead of a match sheet
   rulesTitle: string;
   rulesIntro: string;
   rules: { title: string; body: string }[];

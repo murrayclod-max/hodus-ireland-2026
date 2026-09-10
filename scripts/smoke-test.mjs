@@ -22,7 +22,8 @@ const admin = createClient(URL_, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: 
 
 const PAGES = [
   '/', '/courses', '/courses/rcd', '/courses/annesley', '/courses/portrush',
-  '/courses/rcd/guide', '/courses/portrush/guide', '/courses/rcd/guide/print',
+  '/courses/rcd/guide', '/courses/portrush/guide', '/courses/annesley/guide',
+  '/courses/rcd/guide/print', '/courses/annesley/guide/print?layout=flipbook',
   '/trip', '/match', '/packing', '/flights', '/players', '/weather', '/feed',
   '/tickets/guinness', '/settings',
 ];

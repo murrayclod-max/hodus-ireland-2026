@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { BookOpen } from 'lucide-react';
 import { guideSlugForText } from '@/lib/guides';
+import { GUIDE_SLUGS } from '@/lib/guides/slugs';
 
 // Sits beside a course name wherever one appears. Renders nothing for the
 // courses that have no guide, so it can be dropped in unconditionally.
@@ -14,7 +15,7 @@ export default function FieldGuideChip({
   size?: 'sm' | 'md';
   onDark?: boolean;
 }) {
-  const target = slug && ['rcd', 'portrush'].includes(slug) ? slug : guideSlugForText(courseName);
+  const target = slug && (GUIDE_SLUGS as readonly string[]).includes(slug) ? slug : guideSlugForText(courseName);
   if (!target) return null;
 
   return (

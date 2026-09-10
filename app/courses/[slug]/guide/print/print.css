@@ -139,3 +139,7 @@
 }
 .stripnum-left { left: 0.12in; }
 .stripnum-right { left: 4.37in; }
+
+/* HoleAerial inside a print panel */
+.pmap { width: 1.5in !important; max-width: 1.5in !important; flex-shrink: 0; align-self: flex-start; margin: 0 !important; }
+.pmap img { border-radius: 2px; }

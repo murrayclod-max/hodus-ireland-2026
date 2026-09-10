@@ -5,10 +5,11 @@ import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Printer, Check, Download, Loader2, FileDown } from 'lucide-react';
 import type { CourseGuide, GuideHole } from '@/lib/guides';
 import GuideOffline from '@/components/GuideOffline';
+import HoleAerial from '@/components/HoleAerial';
 
 const SECTION_ORDER: Record<string, number> = { TEE: 1, CLUB: 1, LINE: 2, BUNKERS: 3, WATCH: 4, IN: 5, JOE: 6, NOTE: 7 };
 
-function HoleCard({ hole, slug }: { hole: GuideHole; slug: string }) {
+function HoleCard({ hole, slug, photos, scale }: { hole: GuideHole; slug: string; photos: boolean; scale: boolean }) {
   const sections = [...hole.sections].sort(
     (a, b) => (SECTION_ORDER[a.label] ?? 9) - (SECTION_ORDER[b.label] ?? 9),
   );
@@ -43,16 +44,7 @@ function HoleCard({ hole, slug }: { hole: GuideHole; slug: string }) {
 
       {/* Aerial — tee at the bottom, green at the top */}
       <div style={{ padding: '0 var(--s-4)' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`/guides/${slug}/hole-${hole.n}.jpg`}
-          alt={`Hole ${hole.n} from the air`}
-          loading={hole.n <= 2 ? 'eager' : 'lazy'}
-          style={{
-            width: '100%', maxWidth: 300, margin: '0 auto', display: 'block',
-            borderRadius: 'var(--r-md)', border: '1px solid var(--border)',
-          }}
-        />
+        <HoleAerial slug={slug} n={hole.n} yards={hole.yards} photo={photos} scale={scale} />
       </div>
 
       <div className="stack-sm" style={{ padding: 'var(--s-4)' }}>
@@ -92,7 +84,7 @@ export default function GuideClient({ guide }: { guide: CourseGuide }) {
     try {
       const cache = await caches.open('hodus-guides-v1');
       await cache.addAll([
-        ...guide.holes.map(h => `/guides/${guide.slug}/hole-${h.n}.jpg`),
+        ...(guide.photos === false ? [] : guide.holes.map(h => `/guides/${guide.slug}/hole-${h.n}.jpg`)),
         guide.cover,
         `/courses/${guide.slug}/guide`,
       ]);
@@ -152,7 +144,7 @@ export default function GuideClient({ guide }: { guide: CourseGuide }) {
 
         {tab === 'holes' && (
           <>
-            <HoleCard hole={current} slug={guide.slug} />
+            <HoleCard hole={current} slug={guide.slug} photos={guide.photos !== false} scale={!!guide.scale} />
             <div className="row-between">
               <button className="btn btn-secondary btn-sm" onClick={() => goTo(hole - 1)} disabled={hole === 1}>
                 <ChevronLeft size={16} /> {hole > 1 ? `Hole ${hole - 1}` : ''}

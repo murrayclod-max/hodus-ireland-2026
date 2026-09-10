@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { guideFor } from '@/lib/guides';
 import PrintButton from './PrintButton';
+import HoleAerial from '@/components/HoleAerial';
 import type { CourseGuide, GuideHole } from '@/lib/guides';
 import './print.css';
 
@@ -12,7 +13,7 @@ export const revalidate = 3600;
 // four, and 24 panels come out as six sheets: cover, rules, eighteen holes,
 // the card, quick look, a match sheet and the back page.
 
-function HolePanel({ hole, slug, tees }: { hole: GuideHole; slug: string; tees: string }) {
+function HolePanel({ hole, slug, tees, photos, scale }: { hole: GuideHole; slug: string; tees: string; photos: boolean; scale: boolean }) {
   return (
     <div className="panel">
       <div className="phead">
@@ -24,8 +25,7 @@ function HolePanel({ hole, slug, tees }: { hole: GuideHole; slug: string; tees: 
         </span>
       </div>
       <div className="pbody">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="pmap" src={`/guides/${slug}/hole-${hole.n}.jpg`} alt="" />
+        <HoleAerial className="pmap" slug={slug} n={hole.n} yards={hole.yards} photo={photos} scale={scale} maxWidth={124} />
         <div className="ptext">
           {hole.sections.map((s, i) => (
             <p key={i} className={s.joe ? 'joe' : ''}>
@@ -36,7 +36,7 @@ function HolePanel({ hole, slug, tees }: { hole: GuideHole; slug: string; tees: 
         </div>
       </div>
       <div className="pfoot">
-        <span>Bold = Joe said it · Bunker yardages from the {tees.replace(' tees', '').toLowerCase()} tee</span>
+        <span>{scale ? `Scale in yards from the ${tees.replace(' tees', '').toLowerCase()} tee` : `Bold = Joe said it · Bunker yardages from the ${tees.replace(' tees', '').toLowerCase()} tee`}</span>
         <span className="wind">WIND ________</span>
       </div>
     </div>
@@ -96,7 +96,7 @@ export default async function GuidePrintPage({ params, searchParams }: {
 
   // 3–20 — the holes
   for (const hole of guide.holes) {
-    holePanels.push(<HolePanel key={hole.n} hole={hole} slug={guide.slug} tees={guide.tees} />);
+    holePanels.push(<HolePanel key={hole.n} hole={hole} slug={guide.slug} tees={guide.tees} photos={guide.photos !== false} scale={!!guide.scale} />);
   }
 
   // 21 — the card
@@ -134,8 +134,46 @@ export default async function GuidePrintPage({ params, searchParams }: {
     </div>
   );
 
-  // 23 — match sheet to fill in
-  P.match = (
+  // 23 — the day's groups for a social round, or a match sheet to fill in
+  let groups: { slot: number; time: string; a: string[]; b: string[] }[] = [];
+  if (guide.groupsRound !== undefined) {
+    const { data: round } = await supabase
+      .from('rounds').select('id, tee_time').eq('round_no', guide.groupsRound).maybeSingle();
+    if (round) {
+      const { data: pairs } = await supabase
+        .from('pairings')
+        .select('team, slot, a:player_a(name), b:player_b(name)')
+        .eq('round_id', round.id).order('slot');
+      const base = new Date(`2000-01-01 ${round.tee_time}`);
+      const slots = [...new Set((pairs ?? []).map(p => p.slot))].sort();
+      groups = slots.map(slot => {
+        const t = new Date(base.getTime() + (slot - 1) * 10 * 60000);
+        const time = t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        const of = (team: string) => (pairs ?? []).filter(p => p.slot === slot && p.team === team)
+          .flatMap(p => [(p.a as unknown as { name: string })?.name, (p.b as unknown as { name: string })?.name]).filter(Boolean) as string[];
+        return { slot, time, a: of('murray'), b: of('harris') };
+      });
+    }
+  }
+
+  P.match = guide.groupsRound !== undefined ? (
+    <div className="panel" key="groups">
+      <h2 className="ph2">Tee Times</h2>
+      <p className="pintro">Sunday 13 September · {groups.length} groups off the first tee · does not count towards the match</p>
+      <table className="pmatch">
+        <thead><tr><th>TIME</th><th>GROUP</th></tr></thead>
+        <tbody>
+          {groups.map(g => (
+            <tr key={g.slot}><td style={{ fontWeight: 700 }}>{g.time}</td><td style={{ lineHeight: 1.3 }}>{[...g.a, ...g.b].join(' · ')}</td></tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="mfield"><span>SCORES</span><i /></div>
+      <div className="mfield"><span /><i /></div>
+      <div className="mfield"><span>NOTES</span><i /></div>
+      <div className="mfield"><span /><i /></div>
+    </div>
+  ) : (
     <div className="panel" key="match">
       <h2 className="ph2">The Match</h2>
       <div className="mfield"><span>DATE</span><i /></div>
