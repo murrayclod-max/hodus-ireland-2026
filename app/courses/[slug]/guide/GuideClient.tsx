@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Printer, Check, Download, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Printer, Check, Download, Loader2, FileDown } from 'lucide-react';
 import type { CourseGuide, GuideHole } from '@/lib/guides';
 import GuideOffline from '@/components/GuideOffline';
 
@@ -246,6 +246,9 @@ export default function GuideClient({ guide }: { guide: CourseGuide }) {
             <Link href={`/courses/${guide.slug}/guide/print`} className="btn btn-secondary btn-sm" style={{ flex: 1 }}>
               <Printer size={14} /> Print
             </Link>
+            <a href={`/guides/${guide.slug}/field-guide-print.pdf`} className="btn btn-secondary btn-sm" style={{ flex: 1 }} download>
+              <FileDown size={14} /> PDF
+            </a>
           </div>
         </div>
 
