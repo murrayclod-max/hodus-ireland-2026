@@ -184,7 +184,7 @@ export default function MatchRoundsClient({
               <div>
                 <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: 'var(--s-2)', flexWrap: 'wrap' }}>
                   {roundLabel(round.round_no, rs.inCompetition)} — {course?.name}{' '}
-                  <FieldGuideChip slug={course?.slug} onDark />
+                  <FieldGuideChip slug={course?.slug} />
                   {!rs.inCompetition && (
                     <span style={{
                       fontSize: '0.65rem', fontFamily: 'var(--font-sans)', fontWeight: 600,

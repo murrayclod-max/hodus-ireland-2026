@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { BookOpen } from 'lucide-react';
 import { guideSlugForText } from '@/lib/guides';

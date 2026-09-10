@@ -39,8 +39,13 @@ export default async function CoursesPage() {
 
       <div className="wrap stack" style={{ paddingTop: 'var(--s-5)', paddingBottom: 'var(--s-6)' }}>
         {(courses ?? []).map((course) => (
-          <Link key={course.id} href={`/courses/${course.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
-            <div className="card" style={{ overflow: 'hidden', padding: 0, borderColor: course.rail_color + '44' }}>
+          <div key={course.id} className="card" style={{ overflow: 'hidden', padding: 0, borderColor: course.rail_color + '44', position: 'relative' }}>
+            <Link
+              href={`/courses/${course.slug}`}
+              aria-label={course.name}
+              style={{ position: 'absolute', inset: 0, zIndex: 1 }}
+            />
+            <div>
 
               {/* Banner photo */}
               <div style={{ position: 'relative', height: 170, background: course.rail_color, overflow: 'hidden' }}>
@@ -108,7 +113,9 @@ export default async function CoursesPage() {
                 }}>
                   {course.name}
                 </div>
-                <div style={{ marginTop: 5 }}><FieldGuideChip slug={course.slug} /></div>
+                <div style={{ marginTop: 5, position: 'relative', zIndex: 2, display: 'inline-flex' }}>
+                  <FieldGuideChip slug={course.slug} />
+                </div>
                 <div className="small muted" style={{ marginTop: 3 }}>
                   {[course.location, course.designer, course.founded && `Est. ${course.founded}`].filter(Boolean).join(' · ')}
                 </div>
@@ -128,7 +135,7 @@ export default async function CoursesPage() {
                 </div>
               </div>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
     </div>
