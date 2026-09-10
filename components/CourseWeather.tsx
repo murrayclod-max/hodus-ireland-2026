@@ -32,7 +32,7 @@ function RoundWeather({ slug, round }: { slug: string; round: Props['rounds'][0]
     const params = new URLSearchParams({ slug, date: round.play_date, teeTime: round.tee_time });
     fetch(`/api/weather?${params}`)
       .then(r => r.json())
-      .then(setData)
+      .then(d => setData(d && Array.isArray(d.hours) ? d : null))
       .finally(() => setLoading(false));
   }, [slug, round.play_date, round.tee_time]);
 

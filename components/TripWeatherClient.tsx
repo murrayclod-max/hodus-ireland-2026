@@ -34,7 +34,7 @@ function DayWeather({ day }: { day: DaySlot }) {
     if (day.teeTime) params.set('teeTime', day.teeTime);
     fetch(`/api/weather?${params}`)
       .then(r => r.json())
-      .then(setData)
+      .then(d => setData(d && Array.isArray(d.hours) ? d : null))
       .finally(() => setLoading(false));
   }, [day.slug, day.date, day.teeTime]);
 

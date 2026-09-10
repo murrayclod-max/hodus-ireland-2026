@@ -5,6 +5,7 @@ export const runtime = 'edge';
 // ── Course coordinates ──────────────────────────────────────────────────────
 const COORDS: Record<string, { lat: number; lon: number }> = {
   rcd:          { lat: 54.195, lon: -5.888 },
+  annesley:     { lat: 54.195, lon: -5.888 },  // same dunes as the Championship links
   portrush:     { lat: 55.200, lon: -6.656 },
   portstewart:  { lat: 55.181, lon: -6.717 },
   stpats:       { lat: 55.164, lon: -7.887 },
@@ -46,7 +47,7 @@ const HIST: Record<'ni' | 'donegal' | 'dublin', {
 };
 
 const REGION: Record<string, 'ni' | 'donegal' | 'dublin'> = {
-  rcd: 'ni', portrush: 'ni', portstewart: 'ni',
+  rcd: 'ni', annesley: 'ni', portrush: 'ni', portstewart: 'ni',
   stpats: 'donegal', otm: 'donegal',
   portmarnock: 'dublin',
 };
