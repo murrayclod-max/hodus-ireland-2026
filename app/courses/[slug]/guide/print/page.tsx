@@ -171,10 +171,8 @@ export default async function GuidePrintPage({ params, searchParams }: {
   // 2(s-1)+2 | N-2(s-1)-1 on its inner face. Printed long-edge duplex, the back
   // of the front-right panel lands at back-left, which is exactly what the
   // inner-face order gives — so no mirroring is needed.
-  // A flip book opens straight onto hole 1; the reference pages go at the back
-  const panels: React.ReactNode[] = flipbook
-    ? [P.cover, ...holePanels, P.card, P.quick, P.rules, P.match, P.back]
-    : [P.cover, P.rules, ...holePanels, P.card, P.quick, P.match, P.back];
+  // Same order in every layout: cover, Joe's Rules behind it, then the holes
+  const panels: React.ReactNode[] = [P.cover, P.rules, ...holePanels, P.card, P.quick, P.match, P.back];
 
   // Flip book: cut each sheet lengthwise into two 4.25 x 11 strips, stack them,
   // staple across the middle, fold the top halves back. Each strip is one
