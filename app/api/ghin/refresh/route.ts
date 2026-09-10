@@ -12,6 +12,14 @@ import { createClient, createServiceClient } from '@/lib/supabase/server';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
+// Competition handicaps are locked from Monday morning before County Down
+// through the final round at St Patrick's. After this instant the refresh
+// still records index history and rounds for the trends page, but leaves
+// players.handicap_index — the number the match strokes come from — alone.
+const INDEX_FREEZE_AT = Date.parse('2026-09-14T07:00:00Z'); // 08:00 Irish, Mon 14 Sept
+const INDEX_THAW_AT   = Date.parse('2026-09-20T00:00:00Z'); // after the trip
+export const indexesFrozen = () => Date.now() >= INDEX_FREEZE_AT && Date.now() < INDEX_THAW_AT;
+
 export async function POST(req: NextRequest) {
   const auth = req.headers.get('authorization');
   const secret = process.env.CRON_SECRET;
@@ -59,10 +67,12 @@ export async function POST(req: NextRequest) {
       const validIdx = idx !== null && idx >= -10 && idx <= 54 ? idx : null;
 
       if (validIdx !== null) {
-        // Update handicap_index on players row
-        await supabase.from('players')
-          .update({ handicap_index: validIdx })
-          .eq('id', player.id);
+        // Update handicap_index on players row — unless the match has locked them
+        if (!indexesFrozen()) {
+          await supabase.from('players')
+            .update({ handicap_index: validIdx })
+            .eq('id', player.id);
+        }
 
         // Snapshot into player_indexes
         await supabase.from('player_indexes').upsert(
@@ -111,7 +121,7 @@ export async function POST(req: NextRequest) {
       results.push({ name: player.name, ghin: player.ghin!, index: idx, rounds: recentRounds.length, rawKeys: recentRounds[0] ? Object.keys(recentRounds[0] as object) : [] });
     }
 
-    return NextResponse.json({ ok: true, startedAt, finishedAt: new Date().toISOString(), results, errors });
+    return NextResponse.json({ ok: true, startedAt, indexesFrozen: indexesFrozen(), finishedAt: new Date().toISOString(), results, errors });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message, startedAt }, { status: 500 });
   }

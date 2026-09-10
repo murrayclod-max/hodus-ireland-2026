@@ -83,6 +83,9 @@ export default async function TrendsPage() {
   return (
     <div style={{ background: 'var(--cream)', minHeight: '100dvh' }}>
       <div className="wrap" style={{ paddingTop: 'var(--s-5)', paddingBottom: 'var(--s-8)' }}>
+        <p className="small muted" style={{ marginBottom: 'var(--s-3)' }}>
+          Match handicaps are locked from Monday morning at County Down through St Patrick&rsquo;s. GHIN history keeps updating here; the strokes don&rsquo;t move.
+        </p>
         <TrendsClient players={playerData} recentRounds={recentRounds} isAdmin={!!me?.is_admin} />
       </div>
     </div>
