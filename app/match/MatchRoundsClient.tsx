@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { courseHandicap, fourballStrokes, combinedMatchStrokes, strokeHoles } from '@/lib/handicap';
 import type { Round, Match, Pairing, Player, Course, CourseTee, GameFormat } from '@/lib/types';
+import { roundLabel } from '@/lib/utils';
 
 interface FullRound extends Omit<Round, 'courses'> { courses: Course | null }
 
@@ -181,7 +182,7 @@ export default function MatchRoundsClient({
             <div className="row-between" style={{ marginBottom: 'var(--s-3)', flexWrap: 'wrap', gap: 'var(--s-2)' }}>
               <div>
                 <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: 'var(--s-2)', flexWrap: 'wrap' }}>
-                  {rs.inCompetition ? `Round ${round.round_no}` : 'Appetizer'} — {course?.name}
+                  {roundLabel(round.round_no, rs.inCompetition)} — {course?.name}
                   {!rs.inCompetition && (
                     <span style={{
                       fontSize: '0.65rem', fontFamily: 'var(--font-sans)', fontWeight: 600,

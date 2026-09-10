@@ -105,6 +105,14 @@ export function mapsHref(query: string): string {
   return `https://maps.apple.com/?q=${encodeURIComponent(query)}`;
 }
 
+// The two social rounds are numbered below 1 so everything sorts by date
+// without disturbing the six competition rounds: -1 is the Portmarnock
+// appetizer, 0 the Annesley Amuse Bouche. Neither number is ever shown.
+export function roundLabel(roundNo: number, inCompetition: boolean): string {
+  if (inCompetition) return `Round ${roundNo}`;
+  return roundNo === 0 ? 'Amuse Bouche' : 'Appetizer';
+}
+
 export function initials(name: string): string {
   return name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
 }

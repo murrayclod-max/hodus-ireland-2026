@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import type { Course, Round, SignatureHole } from '@/lib/types';
 import CourseEditPanel from './CourseEditPanel';
 import CourseWeather from '@/components/CourseWeather';
+import { roundLabel } from '@/lib/utils';
 
 export const revalidate = 3600;
 
@@ -216,7 +217,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
               {(rounds ?? []).map(r => (
                 <div key={r.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <span className="chip chip-neutral" style={{ marginRight: 6 }}>{r.in_competition ? `Round ${r.round_no}` : 'Appetizer'}</span>
+                    <span className="chip chip-neutral" style={{ marginRight: 6 }}>{roundLabel(r.round_no, r.in_competition)}</span>
                     <span style={{ fontWeight: 500 }}>{new Date(r.play_date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s-2)' }}>

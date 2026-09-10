@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { WeatherResponse } from '@/app/api/weather/route';
+import { roundLabel } from '@/lib/utils';
 
 interface Props {
   slug: string;
@@ -35,7 +36,7 @@ function RoundWeather({ slug, round }: { slug: string; round: Props['rounds'][0]
       .finally(() => setLoading(false));
   }, [slug, round.play_date, round.tee_time]);
 
-  const label = round.in_competition ? `Round ${round.round_no}` : 'Appetizer';
+  const label = roundLabel(round.round_no, round.in_competition);
   const playDate = new Date(round.play_date + 'T00:00:00').toLocaleDateString('en-US', {
     weekday: 'short', month: 'short', day: 'numeric',
   });

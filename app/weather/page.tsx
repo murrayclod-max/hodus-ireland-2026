@@ -1,6 +1,7 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import TripWeatherClient from '@/components/TripWeatherClient';
+import { roundLabel } from '@/lib/utils';
 
 export const revalidate = 1800;
 
@@ -69,15 +70,15 @@ export default async function WeatherPage() {
       ? (Array.isArray(round.courses) ? round.courses[0] : round.courses)
       : null;
     const slug = courseObj?.slug ?? FALLBACK_SLUGS[date] ?? 'rcd';
-    const roundLabel = round
-      ? `${round.in_competition ? `Round ${round.round_no}` : 'Appetizer'} — ${courseObj?.name ?? ''} · ${round.tee_time}`
+    const roundHeading = round
+      ? `${roundLabel(round.round_no, round.in_competition)} — ${courseObj?.name ?? ''} · ${round.tee_time}`
       : undefined;
     return {
       date,
       label: fmtDayLabel(date),
       slug,
       locationName: COURSE_NAMES[slug] ?? slug,
-      roundLabel,
+      roundLabel: roundHeading,
       teeTime: round?.tee_time,
     };
   });
