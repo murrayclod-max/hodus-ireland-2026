@@ -246,8 +246,8 @@ export default function GuideClient({ guide }: { guide: CourseGuide }) {
             <Link href={`/courses/${guide.slug}/guide/print`} className="btn btn-secondary btn-sm" style={{ flex: 1 }}>
               <Printer size={14} /> Print
             </Link>
-            <a href={`/guides/${guide.slug}/field-guide-booklet.pdf`} className="btn btn-secondary btn-sm" style={{ flex: 1 }} download>
-              <FileDown size={14} /> Booklet PDF
+            <a href={`/guides/${guide.slug}/field-guide-flipbook.pdf`} className="btn btn-secondary btn-sm" style={{ flex: 1 }} download>
+              <FileDown size={14} /> Flip book PDF
             </a>
           </div>
         </div>

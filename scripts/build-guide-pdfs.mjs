@@ -58,6 +58,7 @@ async function main() {
     const VARIANTS = [
       { name: 'print',   query: '' },
       { name: 'booklet', query: '?layout=booklet' },
+      { name: 'flipbook', query: '?layout=flipbook' },
     ];
     for (const slug of GUIDES) for (const { name, query } of VARIANTS) {
       const res = await fetch(`${BASE}/courses/${slug}/guide/print${query}`, { headers: { cookie } });

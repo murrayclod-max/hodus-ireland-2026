@@ -120,3 +120,22 @@
 }
 .hsnum-top { top: 5.5in; margin-top: -9pt; }
 .hsnum-bottom { top: 11in; margin-top: -9pt; }
+
+/* ── Flip book: cut lengthwise, staple across the middle, fold the tops back ── */
+.flipbook .sheet { position: relative; }
+.flipbook .panel { border: none; padding-top: 0.38in; padding-bottom: 0.38in; }  /* room for the staples */
+.flipbook .sheet::before {                /* the cut, down the centre */
+  content: ''; position: absolute; top: 0; bottom: 0; left: 4.25in;
+  border-left: 0.6pt solid #23241F; z-index: 3;
+}
+.flipbook .sheet::after {                 /* the staple line, across the middle */
+  content: ''; position: absolute; left: 0; right: 0; top: 5.5in;
+  border-top: 0.5pt dotted #b8b3a5; z-index: 3;
+}
+.stripnum {
+  position: absolute; top: 5.5in; transform: translateY(-50%);
+  font-size: 5pt; color: #9a958a; font-family: var(--font-sans), system-ui, sans-serif;
+  background: #fff; padding: 0 3px; z-index: 4; letter-spacing: 0.06em;
+}
+.stripnum-left { left: 0.12in; }
+.stripnum-right { left: 4.37in; }

@@ -50,6 +50,7 @@ export default async function GuidePrintPage({ params, searchParams }: {
   const { slug } = await params;
   const { layout } = await searchParams;
   const booklet = layout === 'booklet';
+  const flipbook = layout === 'flipbook';
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
@@ -62,10 +63,11 @@ export default async function GuidePrintPage({ params, searchParams }: {
   const inPar = guide.holes.slice(9).reduce((s, h) => s + h.par, 0);
   const inYds = guide.holes.slice(9).reduce((s, h) => s + h.yards, 0);
 
-  const panels: React.ReactNode[] = [];
+  const P: Record<string, React.ReactNode> = {};
+  const holePanels: React.ReactNode[] = [];
 
   // 1 — cover
-  panels.push(
+  P.cover = (
     <div className="panel panel-cover" key="cover">
       <div className="ceyebrow">HODUS 50TH · SEPTEMBER 2026</div>
       <h1 className="ctitle">{guide.nameLines.map(l => <span key={l}>{l}</span>)}</h1>
@@ -76,11 +78,11 @@ export default async function GuidePrintPage({ params, searchParams }: {
       <div className="cspec">{guide.tees} · Par {guide.par} · {guide.yards.toLocaleString()} yards</div>
       <div className="carch">{guide.architects}</div>
       <div className="cstrap">{guide.strapline}</div>
-    </div>,
+    </div>
   );
 
   // 2 — Joe's rules
-  panels.push(
+  P.rules = (
     <div className="panel" key="rules">
       <h2 className="ph2">{guide.rulesTitle}</h2>
       <p className="pintro">{guide.rulesIntro} Bold means Joe said it.</p>
@@ -89,16 +91,16 @@ export default async function GuidePrintPage({ params, searchParams }: {
           <p key={i}><span className="rt">{i + 1}. {r.title}</span> {r.body}</p>
         ))}
       </div>
-    </div>,
+    </div>
   );
 
   // 3–20 — the holes
   for (const hole of guide.holes) {
-    panels.push(<HolePanel key={hole.n} hole={hole} slug={guide.slug} tees={guide.tees} />);
+    holePanels.push(<HolePanel key={hole.n} hole={hole} slug={guide.slug} tees={guide.tees} />);
   }
 
   // 21 — the card
-  panels.push(
+  P.card = (
     <div className="panel" key="card">
       <h2 className="ph2">The Card</h2>
       <p className="pintro">{guide.tees}, club scorecard. Last column is the call off the tee; bold is Joe&rsquo;s.</p>
@@ -116,11 +118,11 @@ export default async function GuidePrintPage({ params, searchParams }: {
           <tr className="sum"><td>TOTAL</td><td>{guide.par}</td><td>{guide.yards.toLocaleString()}</td><td colSpan={2}></td></tr>
         </tbody>
       </table>
-    </div>,
+    </div>
   );
 
   // 22 — quick look
-  panels.push(
+  P.quick = (
     <div className="panel" key="quick">
       <h2 className="ph2">Quick Look</h2>
       <p className="pintro">The holes that need a decision before you pull a club.</p>
@@ -129,11 +131,11 @@ export default async function GuidePrintPage({ params, searchParams }: {
           <p key={i} className={q.joe ? 'joe' : ''}><span className="rt">{q.title}</span> {q.body}</p>
         ))}
       </div>
-    </div>,
+    </div>
   );
 
   // 23 — match sheet to fill in
-  panels.push(
+  P.match = (
     <div className="panel" key="match">
       <h2 className="ph2">The Match</h2>
       <div className="mfield"><span>DATE</span><i /></div>
@@ -146,11 +148,11 @@ export default async function GuidePrintPage({ params, searchParams }: {
       <div className="mfield"><span>POINTS</span><i /></div>
       <div className="mfield"><span>NOTES</span><i /></div>
       <div className="mfield"><span /><i /></div>
-    </div>,
+    </div>
   );
 
   // 24 — back page
-  panels.push(
+  P.back = (
     <div className="panel panel-back" key="back">
       <div className="bmax">{guide.closing.map(l => <span key={l}>{l}</span>)}</div>
       <div className="bsub">{guide.closingSub}</div>
@@ -158,7 +160,7 @@ export default async function GuidePrintPage({ params, searchParams }: {
         <div>HODUS 50TH · IRELAND · SEPTEMBER 2026</div>
         <div className="bcourses">Royal County Down · Royal Portrush · Portstewart · Rosapenna</div>
       </div>
-    </div>,
+    </div>
   );
 
   // Pocket cards: panels in reading order, four to a sheet, cut them all apart.
@@ -169,9 +171,32 @@ export default async function GuidePrintPage({ params, searchParams }: {
   // 2(s-1)+2 | N-2(s-1)-1 on its inner face. Printed long-edge duplex, the back
   // of the front-right panel lands at back-left, which is exactly what the
   // inner-face order gives — so no mirroring is needed.
+  // A flip book opens straight onto hole 1; the reference pages go at the back
+  const panels: React.ReactNode[] = flipbook
+    ? [P.cover, ...holePanels, P.card, P.quick, P.rules, P.match, P.back]
+    : [P.cover, P.rules, ...holePanels, P.card, P.quick, P.match, P.back];
+
+  // Flip book: cut each sheet lengthwise into two 4.25 x 11 strips, stack them,
+  // staple across the middle, fold the top halves back. Each strip is one
+  // column. Printed SHORT-edge duplex the back of a column's bottom panel is
+  // the back page's top panel in the same column, and every panel stays
+  // upright in the layout — the printer's flip supplies the rotation that
+  // makes each page read right way up when lifted. Strip s carries
+  // N-2(s-1) over 2(s-1)+1 on its front and 2(s-1)+2 over N-2(s-1)-1 on its back.
   const N = panels.length;
   const sheets: React.ReactNode[][] = [];
-  if (!booklet) {
+  if (flipbook) {
+    const pg = (n: number) => panels[n - 1];
+    for (let s = 1; s <= N / 4; s += 2) {
+      const [l, r] = [s, s + 1];
+      const frontTop = (k: number) => pg(N - 2 * (k - 1));
+      const frontBot = (k: number) => pg(2 * (k - 1) + 1);
+      const backTop  = (k: number) => pg(2 * (k - 1) + 2);
+      const backBot  = (k: number) => pg(N - 2 * (k - 1) - 1);
+      sheets.push([frontTop(l), frontTop(r), frontBot(l), frontBot(r)]);
+      sheets.push([backTop(l),  backTop(r),  backBot(l),  backBot(r)]);
+    }
+  } else if (!booklet) {
     for (let i = 0; i < N; i += 4) sheets.push(panels.slice(i, i + 4));
   } else {
     const pg = (n: number) => panels[n - 1];
@@ -185,15 +210,24 @@ export default async function GuidePrintPage({ params, searchParams }: {
   }
 
   return (
-    <div className={booklet ? 'printroot booklet' : 'printroot'}>
+    <div className={flipbook ? 'printroot flipbook' : booklet ? 'printroot booklet' : 'printroot'}>
       <div className="noprint">
         <div className="wrap" style={{ padding: 'var(--s-5) var(--s-4)' }}>
           <h2>{guide.name} — printable guide</h2>
           <div style={{ display: 'flex', gap: 6, margin: '10px 0' }}>
             <Link href={`/courses/${slug}/guide/print`} className={`btn btn-sm ${!booklet ? 'btn-primary' : 'btn-secondary'}`}>Pocket cards</Link>
-            <Link href={`/courses/${slug}/guide/print?layout=booklet`} className={`btn btn-sm ${booklet ? 'btn-primary' : 'btn-secondary'}`}>Stapled booklet</Link>
+            <Link href={`/courses/${slug}/guide/print?layout=booklet`} className={`btn btn-sm ${booklet ? 'btn-primary' : 'btn-secondary'}`}>Side-stapled booklet</Link>
+            <Link href={`/courses/${slug}/guide/print?layout=flipbook`} className={`btn btn-sm ${flipbook ? 'btn-primary' : 'btn-secondary'}`}>Yardage flip book</Link>
           </div>
-          {booklet ? (
+          {flipbook ? (
+            <p className="small muted" style={{ margin: '6px 0 12px' }}>
+              Three sheets, printed <strong>double-sided, flip on the SHORT edge</strong>. Cut each sheet lengthwise
+              along the solid line into two 4.25 × 11 strips. Stack the six strips face up in the order of the small
+              number by the dotted line, 1 on top. Staple twice across the dotted line, then fold the top halves back
+              behind. The cover faces you; lift each page over the staples. Pages run 1 to {N}. Margins None, background
+              graphics on.
+            </p>
+          ) : booklet ? (
             <p className="small muted" style={{ margin: '6px 0 12px' }}>
               Three sheets, printed <strong>double-sided, flip on the long edge</strong>. Cut each sheet across the
               middle along the solid line. Stack the six half-sheets in the order of the small number by each fold,
@@ -217,6 +251,12 @@ export default async function GuidePrintPage({ params, searchParams }: {
             <>
               <span className="hsnum hsnum-top">{i}</span>
               <span className="hsnum hsnum-bottom">{i + 1}</span>
+            </>
+          )}
+          {flipbook && i % 2 === 0 && (
+            <>
+              <span className="stripnum stripnum-left">{i + 1}</span>
+              <span className="stripnum stripnum-right">{i + 2}</span>
             </>
           )}
         </div>
