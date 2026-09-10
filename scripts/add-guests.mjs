@@ -28,14 +28,22 @@ export const GUESTS = [
   { email: 'zoe@sidemarkstudio.com',      name: "Zoe — Jeff's guest", first_name: 'Zoe', of: 'Jeff Pinksa' },
   { email: 'agulash@gmail.com',           name: "Joe's guest",    first_name: 'Guest',  of: 'Joe Gulash' },
   { email: 'ksweetharris@hotmail.com',    name: "Dave's guest",   first_name: 'Guest',  of: 'Dave Harris' },
+  { email: 'libbymitchell@yahoo.com',     name: 'Libby Mitchell', first_name: 'Libby',  of: 'Jim Mitchell' },
+  { email: 'marceinhorn@gmail.com',       name: 'Marc Einhorn',   first_name: 'Marc',   of: 'Lee Einhorn' },
 ];
+
+// Pass emails on the command line to touch only those; with none, all of them.
+// Re-running for someone who has already changed their password would put the
+// temp one back, so be deliberate.
+const ONLY = process.argv.slice(2).map(e => e.toLowerCase());
+const TARGETS = ONLY.length ? GUESTS.filter(g => ONLY.includes(g.email.toLowerCase())) : GUESTS;
 
 async function main() {
   const { data: list } = await db.auth.admin.listUsers({ page: 1, perPage: 200 });
-  const { data: players } = await db.from('players').select('id, name, team').in('name', GUESTS.map(g => g.of));
+  const { data: players } = await db.from('players').select('id, name, team').in('name', TARGETS.map(g => g.of));
   const teamOf = Object.fromEntries(players.map(p => [p.name, p.team]));
 
-  for (const g of GUESTS) {
+  for (const g of TARGETS) {
     let user = list.users.find(u => u.email?.toLowerCase() === g.email.toLowerCase());
     if (user) {
       await db.auth.admin.updateUserById(user.id, { password: TEMP_PASSWORD, email_confirm: true });
