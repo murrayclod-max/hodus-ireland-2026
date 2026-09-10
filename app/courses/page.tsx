@@ -19,7 +19,7 @@ export default async function CoursesPage() {
     .from('courses').select('*').order('sort') as { data: Course[] | null };
 
   const ROUND_LABELS: Record<string, string> = {
-    portmarnock: 'Preview',
+    portmarnock: 'Appetizer',
     annesley: 'Amuse Bouche',
     rcd: 'R1',
     portrush: 'R2',

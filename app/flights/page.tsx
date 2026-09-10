@@ -29,7 +29,7 @@ export default async function FlightsPage() {
       <div className="page-header">
         <div className="wrap">
           <h1>Flights</h1>
-          <p className="sub">Arrival &amp; departure info for all 12</p>
+          <p className="sub">Arrival &amp; departure info for the whole crew</p>
         </div>
       </div>
       <FlightsClient

@@ -30,7 +30,7 @@ export default async function PlayersPage() {
       <div className="page-header">
         <div className="wrap">
           <h1>Players</h1>
-          <p className="sub">12 men · 2 teams · 6 rounds</p>
+          <p className="sub">13 men · 2 teams · 6 rounds</p>
         </div>
       </div>
 
