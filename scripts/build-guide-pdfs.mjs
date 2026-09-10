@@ -22,7 +22,7 @@ const BASE = 'https://hodus.mvgcwl.com';
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const SUPA = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const REF = new URL(SUPA).hostname.split('.')[0];
-const GUIDES = ['rcd', 'portrush', 'annesley'];
+const GUIDES = process.env.ONLY ? process.env.ONLY.split(',') : ['rcd', 'portrush', 'annesley'];
 const OUT = process.env.PDF_OUT ?? '/tmp/hodus-guides';
 
 const admin = createClient(SUPA, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
@@ -82,6 +82,7 @@ async function main() {
       ]);
 
       const dest = path.join('public', 'guides', slug, `field-guide-${name}.pdf`);
+      await mkdir(path.dirname(dest), { recursive: true });
       await copyFile(pdfPath, dest);
       console.log(`${slug} ${name}: ${dest}`);
     }
