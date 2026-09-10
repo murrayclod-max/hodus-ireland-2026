@@ -2,6 +2,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import PlayersGrid from '@/components/PlayersGrid';
 import type { Player } from '@/lib/types';
+import { isGuest } from '@/lib/utils';
 
 export const revalidate = 300;
 
@@ -17,8 +18,9 @@ export default async function PlayersPage() {
   const { data: players } = await db
     .from('players').select('*').order('team').order('handicap_index') as { data: Player[] | null };
 
-  const murray = (players ?? []).filter(p => p.team === 'murray');
-  const harris = (players ?? []).filter(p => p.team === 'harris');
+  const competitors = (players ?? []).filter(p => !isGuest(p));
+  const murray = competitors.filter(p => p.team === 'murray');
+  const harris = competitors.filter(p => p.team === 'harris');
 
   const murrayIdx = murray.reduce((s, p) => s + (p.handicap_index ?? 0), 0);
   const harrisIdx = harris.reduce((s, p) => s + (p.handicap_index ?? 0), 0);

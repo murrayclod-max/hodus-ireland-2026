@@ -41,6 +41,8 @@ export default async function AdminPage() {
       <div className="wrap stack-lg" style={{ paddingTop: 'var(--s-5)', paddingBottom: 'var(--s-6)' }}>
         <AdminPlayerList players={adminPlayers} />
 
+        <Link href="/audit" className="btn btn-secondary btn-block">Who has logged in →</Link>
+
         <Link href="/settings" style={{ color: 'var(--mute)', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: 4 }}>
           ← Back to Settings
         </Link>

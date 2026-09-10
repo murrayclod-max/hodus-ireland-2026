@@ -19,11 +19,12 @@ export default async function CoursesPage() {
 
   const ROUND_LABELS: Record<string, string> = {
     portmarnock: 'Preview',
+    annesley: 'Amuse Bouche',
     rcd: 'R1',
     portrush: 'R2',
     portstewart: 'R3',
-    stpats: 'R4–5',
-    otm: 'R6',
+    stpats: 'R4 & R6',
+    otm: 'R5',
   };
 
   return (
@@ -107,7 +108,7 @@ export default async function CoursesPage() {
                   {course.name}
                 </div>
                 <div className="small muted" style={{ marginTop: 3 }}>
-                  {course.location} · {course.designer} · Est. {course.founded}
+                  {[course.location, course.designer, course.founded && `Est. ${course.founded}`].filter(Boolean).join(' · ')}
                 </div>
                 {course.description && (
                   <p style={{

@@ -1,5 +1,6 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { isGuest } from '@/lib/utils';
 import type { Flight, Player } from '@/lib/types';
 import FlightsClient from './FlightsClient';
 
@@ -21,7 +22,7 @@ export default async function FlightsPage() {
     .order('arrive_at', { nullsFirst: false }) as { data: (Flight & { players: Player })[] | null };
 
   const { data: players } = await db
-    .from('players').select('id, name, first_name, team').order('team').order('name') as { data: Pick<Player, 'id' | 'name' | 'first_name' | 'team'>[] | null };
+    .from('players').select('id, name, first_name, team, fun_facts').order('team').order('name') as { data: Pick<Player, 'id' | 'name' | 'first_name' | 'team' | 'fun_facts'>[] | null };
 
   return (
     <div>
@@ -33,7 +34,7 @@ export default async function FlightsPage() {
       </div>
       <FlightsClient
         flights={flights ?? []}
-        players={players ?? []}
+        players={(players ?? []).filter(p => !isGuest(p))}
         myPlayerId={me?.id ?? null}
         isAdmin={!!me?.is_admin}
       />

@@ -113,6 +113,13 @@ export function roundLabel(roundNo: number, inCompetition: boolean): string {
   return roundNo === 0 ? 'Amuse Bouche' : 'Appetizer';
 }
 
+// Guests can sign in and read the site but take no part in the golf — they're
+// kept out of the roster, the pairing dropdowns and the flight list. RLS gates
+// every table behind having a players row, so a guest needs one too.
+export function isGuest(p: { fun_facts?: Record<string, unknown> | null }): boolean {
+  return p.fun_facts?.guest === true;
+}
+
 export function initials(name: string): string {
   return name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
 }

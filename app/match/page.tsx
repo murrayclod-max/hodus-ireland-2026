@@ -1,5 +1,6 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { isGuest } from '@/lib/utils';
 import type { Match, Round, Course, Pairing, Player, GameFormat } from '@/lib/types';
 import MatchRoundsClient from './MatchRoundsClient';
 import GameFormatsEditor from './GameFormatsEditor';
@@ -77,7 +78,7 @@ export default async function MatchPage() {
           rounds={(rounds ?? []) as any}
           allMatches={allMatches ?? []}
           allPairings={allPairings ?? []}
-          allPlayers={allPlayers ?? []}
+          allPlayers={(allPlayers ?? []).filter(p => !isGuest(p))}
           gameFormats={gameFormats ?? []}
           isAdmin={isAdmin}
         />
