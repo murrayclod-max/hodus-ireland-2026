@@ -143,3 +143,7 @@
 /* HoleAerial inside a print panel */
 .pmap { width: 1.5in !important; max-width: 1.5in !important; flex-shrink: 0; align-self: flex-start; margin: 0 !important; }
 .pmap img { border-radius: 2px; }
+
+/* Back sides of the flip book, pre-turned for long-edge duplex */
+.rot180 { transform: rotate(180deg); }
+@media screen { .rot180::after, .rot180::before { opacity: .6; } }

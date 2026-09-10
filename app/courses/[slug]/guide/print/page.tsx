@@ -45,12 +45,16 @@ function HolePanel({ hole, slug, tees, photos, scale }: { hole: GuideHole; slug:
 
 export default async function GuidePrintPage({ params, searchParams }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ layout?: string }>;
+  searchParams: Promise<{ layout?: string; duplex?: string }>;
 }) {
   const { slug } = await params;
-  const { layout } = await searchParams;
+  const { layout, duplex } = await searchParams;
   const booklet = layout === 'booklet';
   const flipbook = layout === 'flipbook';
+  // Printers default to long-edge duplex, which turns the back over sideways.
+  // A flip book needs the back turned over the top, so for long-edge we bake
+  // the extra half-turn into every back side. ?duplex=short leaves it out.
+  const rotateBacks = flipbook && duplex !== 'short';
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
@@ -257,7 +261,8 @@ export default async function GuidePrintPage({ params, searchParams }: {
           </div>
           {flipbook ? (
             <p className="small muted" style={{ margin: '6px 0 12px' }}>
-              Three sheets, printed <strong>double-sided, flip on the SHORT edge</strong>. Cut each sheet lengthwise
+              Three sheets, printed <strong>double-sided with the printer&rsquo;s normal setting</strong> (long-edge — the
+              back sides are already turned in the file). Cut each sheet lengthwise
               along the solid line into two 4.25 × 11 strips. Stack the six strips face up in the order of the small
               number by the dotted line, 1 on top. Staple twice across the dotted line, then fold the top halves back
               behind. The cover faces you; lift each page over the staples. Pages run 1 to {N}. Margins None, background
@@ -281,7 +286,7 @@ export default async function GuidePrintPage({ params, searchParams }: {
       </div>
 
       {sheets.map((sheet, i) => (
-        <div className="sheet" key={i}>
+        <div className={rotateBacks && i % 2 === 1 ? 'sheet rot180' : 'sheet'} key={i}>
           {sheet}
           {booklet && i % 2 === 1 && (
             <>
