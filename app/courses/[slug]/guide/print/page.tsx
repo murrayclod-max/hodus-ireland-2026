@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect, notFound } from 'next/navigation';
+import Link from 'next/link';
 import { guideFor } from '@/lib/guides';
 import PrintButton from './PrintButton';
 import type { CourseGuide, GuideHole } from '@/lib/guides';
@@ -42,8 +43,13 @@ function HolePanel({ hole, slug, tees }: { hole: GuideHole; slug: string; tees: 
   );
 }
 
-export default async function GuidePrintPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function GuidePrintPage({ params, searchParams }: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ layout?: string }>;
+}) {
   const { slug } = await params;
+  const { layout } = await searchParams;
+  const booklet = layout === 'booklet';
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
@@ -155,25 +161,65 @@ export default async function GuidePrintPage({ params }: { params: Promise<{ slu
     </div>,
   );
 
+  // Pocket cards: panels in reading order, four to a sheet, cut them all apart.
+  //
+  // Booklet: saddle-stitch imposition. Each letter sheet is cut across the
+  // middle into two half-sheets; each half-sheet folds down its centre into two
+  // leaves. Half-sheet s carries pages N-2(s-1) | 2(s-1)+1 on its outer face and
+  // 2(s-1)+2 | N-2(s-1)-1 on its inner face. Printed long-edge duplex, the back
+  // of the front-right panel lands at back-left, which is exactly what the
+  // inner-face order gives — so no mirroring is needed.
+  const N = panels.length;
   const sheets: React.ReactNode[][] = [];
-  for (let i = 0; i < panels.length; i += 4) sheets.push(panels.slice(i, i + 4));
+  if (!booklet) {
+    for (let i = 0; i < N; i += 4) sheets.push(panels.slice(i, i + 4));
+  } else {
+    const pg = (n: number) => panels[n - 1];
+    for (let hs = 1; hs <= N / 4; hs += 2) {
+      const [a, b] = [hs, hs + 1];
+      const outer = (s: number) => [pg(N - 2 * (s - 1)), pg(2 * (s - 1) + 1)];
+      const inner = (s: number) => [pg(2 * (s - 1) + 2), pg(N - 2 * (s - 1) - 1)];
+      sheets.push([...outer(a), ...outer(b)]);   // front of the letter sheet
+      sheets.push([...inner(a), ...inner(b)]);   // back of the letter sheet
+    }
+  }
 
   return (
-    <div className="printroot">
+    <div className={booklet ? 'printroot booklet' : 'printroot'}>
       <div className="noprint">
         <div className="wrap" style={{ padding: 'var(--s-5) var(--s-4)' }}>
           <h2>{guide.name} — printable guide</h2>
-          <p className="small muted" style={{ margin: '6px 0 12px' }}>
-            {sheets.length} sheets of 8.5 × 11, four panels each. Print double-sided on the short edge if you want
-            it as a booklet, or single-sided and cut along the dashed lines for {guide.holes.length} pocket cards.
-            Set margins to None and turn on background graphics.
-          </p>
+          <div style={{ display: 'flex', gap: 6, margin: '10px 0' }}>
+            <Link href={`/courses/${slug}/guide/print`} className={`btn btn-sm ${!booklet ? 'btn-primary' : 'btn-secondary'}`}>Pocket cards</Link>
+            <Link href={`/courses/${slug}/guide/print?layout=booklet`} className={`btn btn-sm ${booklet ? 'btn-primary' : 'btn-secondary'}`}>Stapled booklet</Link>
+          </div>
+          {booklet ? (
+            <p className="small muted" style={{ margin: '6px 0 12px' }}>
+              Three sheets, printed <strong>double-sided, flip on the long edge</strong>. Cut each sheet across the
+              middle along the solid line. Stack the six half-sheets in the order of the small number by each fold,
+              1 on the bottom, then fold the stack down the dotted line and staple at the fold. Pages run 1 to {N}.
+              Set margins to None and turn on background graphics.
+            </p>
+          ) : (
+            <p className="small muted" style={{ margin: '6px 0 12px' }}>
+              {sheets.length} sheets of 8.5 × 11, four panels each. Print single-sided and cut along the dashed lines
+              for {N} pocket cards. Set margins to None and turn on background graphics.
+            </p>
+          )}
           <PrintButton />
         </div>
       </div>
 
       {sheets.map((sheet, i) => (
-        <div className="sheet" key={i}>{sheet}</div>
+        <div className="sheet" key={i}>
+          {sheet}
+          {booklet && i % 2 === 1 && (
+            <>
+              <span className="hsnum hsnum-top">{i}</span>
+              <span className="hsnum hsnum-bottom">{i + 1}</span>
+            </>
+          )}
+        </div>
       ))}
     </div>
   );

@@ -55,9 +55,13 @@ async function main() {
   await mkdir(OUT, { recursive: true });
 
   await withSession(async cookie => {
-    for (const slug of GUIDES) {
-      const res = await fetch(`${BASE}/courses/${slug}/guide/print`, { headers: { cookie } });
-      if (!res.ok) throw new Error(`${slug}: HTTP ${res.status}`);
+    const VARIANTS = [
+      { name: 'print',   query: '' },
+      { name: 'booklet', query: '?layout=booklet' },
+    ];
+    for (const slug of GUIDES) for (const { name, query } of VARIANTS) {
+      const res = await fetch(`${BASE}/courses/${slug}/guide/print${query}`, { headers: { cookie } });
+      if (!res.ok) throw new Error(`${slug} ${name}: HTTP ${res.status}`);
       let html = await res.text();
 
       // Chrome opens this from disk, so every root-relative URL needs the host
@@ -66,8 +70,8 @@ async function main() {
         .replace(/(href|src)="\/(?!\/)/g, `$1="${BASE}/`)
         .replace(/url\(\/(?!\/)/g, `url(${BASE}/`);
 
-      const htmlPath = path.join(OUT, `${slug}.html`);
-      const pdfPath = path.join(OUT, `${slug}-field-guide-print.pdf`);
+      const htmlPath = path.join(OUT, `${slug}-${name}.html`);
+      const pdfPath = path.join(OUT, `${slug}-field-guide-${name}.pdf`);
       await writeFile(htmlPath, html);
 
       await run(CHROME, [
@@ -76,9 +80,9 @@ async function main() {
         `--print-to-pdf=${pdfPath}`, `file://${htmlPath}`,
       ]);
 
-      const dest = path.join('public', 'guides', slug, 'field-guide-print.pdf');
+      const dest = path.join('public', 'guides', slug, `field-guide-${name}.pdf`);
       await copyFile(pdfPath, dest);
-      console.log(`${slug}: ${dest}`);
+      console.log(`${slug} ${name}: ${dest}`);
     }
   });
 }
