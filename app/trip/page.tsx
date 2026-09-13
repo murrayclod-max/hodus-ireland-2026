@@ -44,7 +44,7 @@ const HOTELS = [
   {
     name: 'Golflinks Hotel Portrush',
     nights: 'Tue 15 & Wed 16 Sept',
-    address: 'Bushmills Road, Portrush, Co. Antrim, BT56 8JQ',
+    address: 'Bushmills Road, Portrush, Co. Antrim, BT56 8JG',
     phone: '+44 28 7082 6611',
     tel: '+442870826611',
     email: 'info@golflinkshotel.com',
@@ -73,8 +73,10 @@ const HOTELS = [
 const CONTACTS: {
   icon: string; name: string; mapQuery: string; phone: string; tel: string; extra?: React.ReactNode;
 }[] = [
-  { icon: '⛳', name: 'Royal County Down', mapQuery: 'Royal County Down Golf Club, Newcastle, Co. Down', phone: '+44 28 4372 3314', tel: '+442843723314' },
-  { icon: '⛳', name: 'Portstewart Golf Club', mapQuery: 'Portstewart Golf Club, Portstewart, Co. Londonderry', phone: '+44 28 7083 2015', tel: '+442870832015' },
+  { icon: '⛳', name: 'The Jameson Links, Portmarnock', mapQuery: 'Portmarnock Resort, Strand Road, Portmarnock, Co. Dublin, D13 V2X7', phone: '+353 1 846 0611', tel: '+35318460611' },
+  { icon: '⛳', name: 'Royal County Down', mapQuery: 'Royal County Down Golf Club, 36 Golf Links Road, Newcastle, Co. Down, BT33 0AN', phone: '+44 28 4372 3314', tel: '+442843723314' },
+  { icon: '⛳', name: 'Royal Portrush', mapQuery: 'Royal Portrush Golf Club, Dunluce Road, Portrush, Co. Antrim, BT56 8JQ', phone: '+44 28 7082 2311', tel: '+442870822311' },
+  { icon: '⛳', name: 'Portstewart Golf Club', mapQuery: 'Portstewart Golf Club, 117 Strand Road, Portstewart, Co. Londonderry, BT55 7PG', phone: '+44 28 7083 2015', tel: '+442870832015' },
   { icon: '🍺', name: 'Guinness Storehouse', mapQuery: "Guinness Storehouse, St James's Gate, Dublin 8", phone: '+353 1 408 4800', tel: '+35314084800',
     extra: <> · Ref 904474457 · <Link href="/tickets/guinness" style={{ color: 'var(--green)', fontWeight: 600 }}>tickets</Link></> },
   { icon: '🍽', name: 'The Olde Glen, Carrickart', mapQuery: 'The Olde Glen Bar and Restaurant, Carrigart, Co. Donegal', phone: '+353 83 158 5777', tel: '+353831585777' },
@@ -146,7 +148,8 @@ export default async function TripPage() {
               <div>
                 <div style={{ fontWeight: 600 }}>Vari — Hidden Links Ireland</div>
                 <div className="small muted">
-                  <a href="tel:+3533866933369" style={{ color: 'var(--green)', fontWeight: 600 }}>+353 386 693 3369</a> ·{' '}
+                  <a href="tel:+353664011125" style={{ color: 'var(--green)', fontWeight: 600 }}>+353 66 401 1125</a> ·{' '}
+                  <a href="tel:+353868535535" style={{ color: 'var(--green)', fontWeight: 600 }}>+353 86 853 5535</a> ·{' '}
                   <a href="mailto:ireland@hiddenlinksgolf.com" style={{ color: 'var(--green)' }}>ireland@hiddenlinksgolf.com</a>
                 </div>
               </div>
@@ -154,10 +157,28 @@ export default async function TripPage() {
             <div className="row">
               <span style={{ fontSize: '1.1rem' }}>📋</span>
               <div>
-                <div style={{ fontWeight: 600 }}>Meredith Emerson — Hidden Links (US)</div>
+                <div style={{ fontWeight: 600 }}>Michelle McGreevy — Hidden Links (US office)</div>
                 <div className="small muted">
-                  <a href="tel:+16784444267" style={{ color: 'var(--green)', fontWeight: 600 }}>(678) 444-4267</a> ·{' '}
-                  <a href="mailto:memerson@hiddenlinksgolf.com" style={{ color: 'var(--green)' }}>memerson@hiddenlinksgolf.com</a>
+                  <a href="tel:+16784444267" style={{ color: 'var(--green)', fontWeight: 600 }}>+1 678-444-4267</a> ·{' '}
+                  <a href="mailto:mmcgreevy@hiddenlinksgolf.com" style={{ color: 'var(--green)' }}>mmcgreevy@hiddenlinksgolf.com</a>
+                </div>
+              </div>
+            </div>
+            <div className="row">
+              <span style={{ fontSize: '1.1rem' }}>✈️</span>
+              <div>
+                <div style={{ fontWeight: 600 }}>Flight delayed or changed</div>
+                <div className="small muted">
+                  Hidden Links&rsquo; delay line: <a href="tel:+13866933355" style={{ color: 'var(--green)', fontWeight: 600 }}>+1 386 693 3355</a>
+                </div>
+              </div>
+            </div>
+            <div className="row">
+              <span style={{ fontSize: '1.1rem' }}>🗂</span>
+              <div>
+                <div style={{ fontWeight: 600 }}>Hidden Links client portal</div>
+                <div className="small muted">
+                  <a href="https://client.hiddenlinksgolf.com//Tour/Login?t=9980" style={{ color: 'var(--green)', fontWeight: 600 }}>client.hiddenlinksgolf.com</a> · password <strong>Hodus2026</strong> · the confirmed schedule, nothing prepaid needs a voucher
                 </div>
               </div>
             </div>
@@ -254,7 +275,17 @@ export default async function TripPage() {
         <div className="card" style={{ background: 'rgba(201,162,75,.08)', borderColor: 'var(--gilt)' }}>
           <p style={{ fontWeight: 500 }}>📞 Booked through <strong>Hidden Links</strong></p>
           <p className="small muted" style={{ marginTop: 4 }}>Rosapenna (Rounds 4–6) is self-arranged through the hotel directly.</p>
-          <p className="small muted" style={{ marginTop: 4 }}>Dinner reservations need at least 24 hours&rsquo; notice to cancel — call the restaurant, not Vari.</p>
+          <p className="small muted" style={{ marginTop: 4 }}>Dinner reservations need at least 48 hours&rsquo; notice to cancel — call the restaurant, not Vari. Arrive at every club an hour before the tee.</p>
+        </div>
+
+        {/* Hidden Links' restaurant picks, for the nights nothing's booked */}
+        <div className="card">
+          <p className="section-label" style={{ marginBottom: 'var(--s-1)' }}>If You Want Somewhere Else</p>
+          <p className="small muted" style={{ marginBottom: 'var(--s-3)' }}>Hidden Links&rsquo; picks from past groups. Book ahead; 48 hours to cancel.</p>
+          <div className="stack-sm small">
+            <div><strong>Newcastle</strong> — <a href="http://www.villavinci.co.uk/" style={{ color: 'var(--green)' }}>Villa Vinci</a> · <a href="https://www.brunelsrestaurant.co.uk" style={{ color: 'var(--green)' }}>Brunel&rsquo;s</a> · <a href="https://www.greatjones.co.uk/dinner-menu/" style={{ color: 'var(--green)' }}>Great Jones</a> · <a href="https://graphitenewcastle.com/dinner/" style={{ color: 'var(--green)' }}>Graphite</a> · <a href="https://www.slievedonardhotel.com/food-drink/" style={{ color: 'var(--green)' }}>the Slieve Donard</a></div>
+            <div><strong>Portrush</strong> — <a href="http://www.ramorerestaurant.com" style={{ color: 'var(--green)' }}>Ramore</a> · <a href="https://shantyportrush.com" style={{ color: 'var(--green)' }}>The Shanty</a> · <a href="https://www.quaysgastropub.com" style={{ color: 'var(--green)' }}>The Quays</a> (pub grub) · <a href="https://marineandlawn.com/portrushadelphi/food-drink/" style={{ color: 'var(--green)' }}>The Adelphi</a> (traditional)</div>
+          </div>
         </div>
 
         {/* Cash & Caddies */}
