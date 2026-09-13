@@ -24,18 +24,20 @@ try {
   const sess = await (await fetch(`${URL_}/auth/v1/token?grant_type=password`, { method: 'POST', headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) })).json();
   const cookie = `sb-${REF}-auth-token=base64-${Buffer.from(JSON.stringify(sess)).toString('base64')}`;
 
-  const [{ data: courses }, { data: players }, { data: rounds }] = await Promise.all([
-    admin.from('courses').select('slug, crest_url'),
-    admin.from('players').select('id, avatar_url').is('fun_facts->guest', null),
-    admin.from('rounds').select('id'),
+  const q = async (name, p) => { const { data, error } = await p; if (error || !data) throw new Error(`${name}: ${error?.message ?? 'no data'}`); return data; };
+  const [courses, players, rounds] = await Promise.all([
+    q('courses', admin.from('courses').select('slug, crest_url')),
+    q('players', admin.from('players').select('id, avatar_url, fun_facts')),
+    q('rounds', admin.from('rounds').select('id')),
   ]);
+  const realPlayers = players.filter(p => !p.fun_facts?.guest);
 
   const pages = [
     '/', '/trip', '/courses', '/match', '/lass', '/weather', '/flights', '/feed', '/players', '/trends',
     '/settings', '/packing', '/tickets/guinness', '/admin', '/audit', '/trip/new',
     ...courses.map(c => `/courses/${c.slug}`),
     ...['rcd', 'portrush', 'annesley'].flatMap(s => [`/courses/${s}/guide`, `/courses/${s}/guide/print`, `/courses/${s}/guide/print?layout=booklet`, `/courses/${s}/guide/print?layout=flipbook`]),
-    ...players.map(p => `/players/${p.id}`),
+    ...realPlayers.map(p => `/players/${p.id}`),
     ...rounds.map(r => `/match/${r.id}`),   // scoring pages are keyed by round
   ];
 
@@ -49,7 +51,7 @@ try {
   // Static assets referenced by data and guides
   const assets = new Set([
     ...courses.flatMap(c => [c.crest_url, `/banners/${c.slug}.png`].filter(Boolean)),
-    ...players.map(p => p.avatar_url).filter(Boolean),
+    ...realPlayers.map(p => p.avatar_url).filter(Boolean),
     '/hodus-flag.png', '/manifest.json', '/sw.js', '/map/route_map.png',
     ...['rcd', 'portrush'].flatMap(s => Array.from({ length: 18 }, (_, i) => `/guides/${s}/hole-${i + 1}.jpg`)),
     ...['rcd', 'portrush', 'annesley'].flatMap(s => ['print', 'booklet', 'flipbook'].map(v => `/guides/${s}/field-guide-${v}.pdf`)),
