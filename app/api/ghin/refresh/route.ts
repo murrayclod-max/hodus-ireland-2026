@@ -12,11 +12,11 @@ import { createClient, createServiceClient } from '@/lib/supabase/server';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
-// Competition handicaps are locked from Monday morning before County Down
+// Competition handicaps are locked from Sunday morning before County Down
 // through the final round at St Patrick's. After this instant the refresh
 // still records index history and rounds for the trends page, but leaves
 // players.handicap_index — the number the match strokes come from — alone.
-const INDEX_FREEZE_AT = Date.parse('2026-09-14T07:00:00Z'); // 08:00 Irish, Mon 14 Sept
+const INDEX_FREEZE_AT = Date.parse('2026-09-13T08:00:00Z'); // 09:00 Irish, Sun 13 Sept — Round 1 moved up a day
 const INDEX_THAW_AT   = Date.parse('2026-09-20T00:00:00Z'); // after the trip
 export const indexesFrozen = () => Date.now() >= INDEX_FREEZE_AT && Date.now() < INDEX_THAW_AT;
 
